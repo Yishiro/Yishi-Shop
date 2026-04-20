@@ -4,6 +4,7 @@ const navToggle = document.querySelector(".nav-toggle");
 const siteNav = document.querySelector(".site-nav");
 const year = document.querySelector("[data-year]");
 const discordLinks = document.querySelectorAll("[data-discord-link]");
+const catalogMenu = document.querySelector(".catalog-menu");
 
 if (year) {
   year.textContent = new Date().getFullYear();
@@ -28,3 +29,11 @@ discordLinks.forEach((link) => {
   link.setAttribute("target", "_blank");
   link.setAttribute("rel", "noreferrer");
 });
+
+if (catalogMenu) {
+  catalogMenu.querySelectorAll("a").forEach((link) => {
+    link.addEventListener("click", () => {
+      catalogMenu.removeAttribute("open");
+    });
+  });
+}

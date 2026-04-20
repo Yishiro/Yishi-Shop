@@ -14,14 +14,39 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="styles.css?v=divin-portal-1" />
+    <link rel="stylesheet" href="styles.css?v=categories-1" />
   </head>
   <body>
     <header class="site-header" data-header>
-      <a class="brand" href="#top" aria-label="Retour en haut">
-        <span class="brand-mark">YS</span>
-        <span>Yishi's Shop</span>
-      </a>
+      <div class="header-left">
+        <a class="brand" href="#top" aria-label="Retour en haut">
+          <span class="brand-mark">YS</span>
+          <span>Yishi's Shop</span>
+        </a>
+
+        <details class="catalog-menu">
+          <summary aria-label="Ouvrir les catégories">
+            <span class="menu-icon" aria-hidden="true">
+              <span></span>
+              <span></span>
+              <span></span>
+            </span>
+            <span>Shop</span>
+          </summary>
+          <div class="catalog-panel">
+            <details class="game-menu" open>
+              <summary>Blox Fruit</summary>
+              <div class="category-list">
+                <a href="#offres">Skins</a>
+                <a href="#offres">Fruits</a>
+                <a href="#offres">Permanents</a>
+                <a href="#offres">Gamepass</a>
+                <a href="#offres">Boosts</a>
+              </div>
+            </details>
+          </div>
+        </details>
+      </div>
 
       <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
         <span></span>
@@ -240,6 +265,6 @@
       <a href="#top">Retour en haut</a>
     </footer>
 
-    <script src="script.js?v=a3070c8"></script>
+    <script src="script.js?v=categories-1"></script>
   </body>
 </html>

@@ -51,6 +51,13 @@ img {
   backdrop-filter: blur(18px);
 }
 
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
 .brand {
   display: inline-flex;
   align-items: center;
@@ -68,6 +75,108 @@ img {
   background: var(--charcoal);
   color: #fff;
   font-size: 0.88rem;
+}
+
+.catalog-menu {
+  position: relative;
+}
+
+.catalog-menu summary,
+.game-menu summary {
+  list-style: none;
+}
+
+.catalog-menu summary::-webkit-details-marker,
+.game-menu summary::-webkit-details-marker {
+  display: none;
+}
+
+.catalog-menu > summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 40px;
+  padding: 9px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+  font-weight: 800;
+  box-shadow: 0 8px 22px rgba(32, 36, 42, 0.06);
+}
+
+.catalog-menu > summary:hover,
+.catalog-menu > summary:focus-visible {
+  border-color: rgba(22, 184, 199, 0.45);
+  background: #eef9f7;
+}
+
+.menu-icon {
+  display: grid;
+  gap: 3px;
+  width: 18px;
+}
+
+.menu-icon span {
+  display: block;
+  height: 2px;
+  border-radius: 999px;
+  background: var(--ink);
+}
+
+.catalog-panel {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 0;
+  width: min(280px, calc(100vw - 36px));
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.game-menu > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 8px;
+  background: var(--charcoal);
+  color: #fff;
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.game-menu > summary::after {
+  content: "v";
+  color: var(--lime);
+  font-size: 0.78rem;
+}
+
+.game-menu[open] > summary::after {
+  content: "^";
+}
+
+.category-list {
+  display: grid;
+  gap: 6px;
+  padding-top: 8px;
+}
+
+.category-list a {
+  padding: 10px 12px;
+  border-radius: 8px;
+  color: var(--muted);
+  font-weight: 750;
+}
+
+.category-list a:hover,
+.category-list a:focus-visible {
+  background: #eaf7f4;
+  color: var(--ink);
 }
 
 .site-nav {
@@ -466,6 +575,31 @@ h3 {
 }
 
 @media (max-width: 880px) {
+  .site-header {
+    gap: 10px;
+  }
+
+  .header-left {
+    gap: 8px;
+  }
+
+  .brand {
+    gap: 8px;
+  }
+
+  .brand span:last-child {
+    display: none;
+  }
+
+  .catalog-menu > summary {
+    padding-inline: 10px;
+  }
+
+  .catalog-panel {
+    left: auto;
+    right: 0;
+  }
+
   .nav-toggle {
     display: block;
   }
