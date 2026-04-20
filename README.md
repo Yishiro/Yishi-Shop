@@ -13,6 +13,10 @@ Site vitrine statique pour une boutique Discord.
 - `assets/kitsune-crimson.png.webp` : image du produit Kitsune Crimson
 - `assets/ember-dragon.png.png` : image du produit Ember Dragon
 - `assets/divine-portal.webp` : image du produit Divin Portal
+- `assets/rose-quartz-diamond.webp` : image du produit Rose Quartz Diamond
+- `assets/emerald-diamond.webp` : image du produit Emerald Diamond
+- `assets/topaz-diamond.webp` : image du produit Topaz Diamond
+- `assets/ruby-diamond.webp` : image du produit Ruby Diamond
 
 ## Modifier le lien Discord
 

@@ -494,6 +494,10 @@ h3 {
   background: #080b18;
 }
 
+.product-image-diamond {
+  background: #090a10;
+}
+
 .product-card.featured {
   border-color: rgba(22, 184, 199, 0.45);
   box-shadow: 0 24px 60px rgba(22, 184, 199, 0.16);
@@ -512,6 +516,30 @@ h3 {
 .product-card.portal {
   border-color: rgba(102, 92, 214, 0.42);
   box-shadow: 0 24px 60px rgba(102, 92, 214, 0.14);
+}
+
+.diamond-card {
+  border-color: rgba(104, 128, 153, 0.32);
+}
+
+.rose-diamond {
+  border-color: rgba(229, 111, 179, 0.42);
+  box-shadow: 0 24px 60px rgba(229, 111, 179, 0.12);
+}
+
+.emerald-diamond {
+  border-color: rgba(37, 177, 98, 0.42);
+  box-shadow: 0 24px 60px rgba(37, 177, 98, 0.12);
+}
+
+.topaz-diamond {
+  border-color: rgba(230, 177, 50, 0.42);
+  box-shadow: 0 24px 60px rgba(230, 177, 50, 0.12);
+}
+
+.ruby-diamond {
+  border-color: rgba(209, 47, 64, 0.42);
+  box-shadow: 0 24px 60px rgba(209, 47, 64, 0.12);
 }
 
 .product-top {
