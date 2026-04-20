@@ -5,6 +5,7 @@ Site vitrine statique pour une boutique Discord.
 ## Fichiers
 
 - `index.html` : structure du site
+- `category.html` : page des catégories Blox Fruit
 - `styles.css` : design responsive
 - `script.js` : menu mobile et lien Discord
 - `assets/hero-yishis-shop.png` : image principale du site
