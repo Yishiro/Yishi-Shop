@@ -278,6 +278,11 @@ h3 {
   gap: 18px;
 }
 
+.products {
+  grid-template-columns: minmax(280px, 440px);
+  justify-content: center;
+}
+
 .product-card,
 .reviews figure,
 .order-panel,
@@ -292,6 +297,25 @@ h3 {
   display: grid;
   gap: 18px;
   padding: 22px;
+}
+
+.product-card-large {
+  padding: 18px;
+}
+
+.product-image {
+  display: grid;
+  min-height: 260px;
+  place-items: center;
+  border-radius: 8px;
+  background: #08090d;
+  overflow: hidden;
+}
+
+.product-image img {
+  width: 100%;
+  max-height: 320px;
+  object-fit: contain;
 }
 
 .product-card.featured {

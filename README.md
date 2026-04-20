@@ -8,6 +8,7 @@ Site vitrine statique pour une boutique Discord.
 - `styles.css` : design responsive
 - `script.js` : menu mobile et lien Discord
 - `assets/hero-yishis-shop.png` : image principale du site
+- `assets/kitsune-galaxy.webp` : image du produit Kitsune Galaxy
 
 ## Modifier le lien Discord
 
