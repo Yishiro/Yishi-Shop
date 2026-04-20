@@ -14,7 +14,7 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="styles.css?v=fruits-1" />
+    <link rel="stylesheet" href="styles.css?v=sort-1" />
   </head>
   <body>
     <header class="site-header" data-header>
@@ -37,11 +37,11 @@
             <details class="game-menu" open>
               <summary>Blox Fruit</summary>
               <div class="category-list">
-                <a href="category.html?category=skins&v=fruits-1" data-category-link="skins">Skins</a>
-                <a href="category.html?category=fruits&v=fruits-1" data-category-link="fruits">Fruits</a>
-                <a href="category.html?category=permanents&v=fruits-1" data-category-link="permanents">Permanents</a>
-                <a href="category.html?category=gamepass&v=fruits-1" data-category-link="gamepass">Gamepass</a>
-                <a href="category.html?category=boosts&v=fruits-1" data-category-link="boosts">Boosts</a>
+                <a href="category.html?category=skins&v=sort-1" data-category-link="skins">Skins</a>
+                <a href="category.html?category=fruits&v=sort-1" data-category-link="fruits">Fruits</a>
+                <a href="category.html?category=permanents&v=sort-1" data-category-link="permanents">Permanents</a>
+                <a href="category.html?category=gamepass&v=sort-1" data-category-link="gamepass">Gamepass</a>
+                <a href="category.html?category=boosts&v=sort-1" data-category-link="boosts">Boosts</a>
               </div>
             </details>
           </div>
@@ -55,7 +55,7 @@
       </button>
 
       <nav class="site-nav" id="site-nav">
-        <a href="category.html?category=skins&v=fruits-1">Offres</a>
+        <a href="category.html?category=skins&v=sort-1">Offres</a>
         <a href="index.html#avis">Avis</a>
         <a href="index.html#faq">FAQ</a>
         <a class="nav-cta" href="index.html#commander">Commander</a>
@@ -75,15 +75,25 @@
 
       <section class="section category-section" id="offres">
         <div class="category-tabs" aria-label="Catégories Blox Fruit">
-          <a href="category.html?category=skins&v=fruits-1" data-category-link="skins">Skins</a>
-          <a href="category.html?category=fruits&v=fruits-1" data-category-link="fruits">Fruits</a>
-          <a href="category.html?category=permanents&v=fruits-1" data-category-link="permanents">Permanents</a>
-          <a href="category.html?category=gamepass&v=fruits-1" data-category-link="gamepass">Gamepass</a>
-          <a href="category.html?category=boosts&v=fruits-1" data-category-link="boosts">Boosts</a>
+          <a href="category.html?category=skins&v=sort-1" data-category-link="skins">Skins</a>
+          <a href="category.html?category=fruits&v=sort-1" data-category-link="fruits">Fruits</a>
+          <a href="category.html?category=permanents&v=sort-1" data-category-link="permanents">Permanents</a>
+          <a href="category.html?category=gamepass&v=sort-1" data-category-link="gamepass">Gamepass</a>
+          <a href="category.html?category=boosts&v=sort-1" data-category-link="boosts">Boosts</a>
+        </div>
+
+        <div class="sort-bar">
+          <label for="product-sort">Trier par</label>
+          <select id="product-sort" data-product-sort>
+            <option value="price-asc">Prix croissant</option>
+            <option value="price-desc">Prix décroissant</option>
+            <option value="name-asc">Alphabétique A-Z</option>
+            <option value="name-desc">Alphabétique Z-A</option>
+          </select>
         </div>
 
         <div class="products" data-products>
-          <article class="product-card featured product-card-large" data-product-category="skins">
+          <article class="product-card featured product-card-large" data-product-category="skins" data-title="Kitsune Galaxy" data-price="48">
             <div class="product-image">
               <img src="assets/kitsune-galaxy.webp?v=pages-1" alt="Kitsune Galaxy" />
             </div>
@@ -99,7 +109,7 @@
             <a class="card-link" href="index.html#commander">Commander</a>
           </article>
 
-          <article class="product-card crimson product-card-large" data-product-category="skins">
+          <article class="product-card crimson product-card-large" data-product-category="skins" data-title="Kitsune Crimson" data-price="40">
             <div class="product-image product-image-crimson">
               <img src="assets/kitsune-crimson.png.webp?v=pages-1" alt="Kitsune Crimson" />
             </div>
@@ -115,7 +125,7 @@
             <a class="card-link" href="index.html#commander">Commander</a>
           </article>
 
-          <article class="product-card ember product-card-large" data-product-category="skins">
+          <article class="product-card ember product-card-large" data-product-category="skins" data-title="Ember Dragon" data-price="33">
             <div class="product-image product-image-ember">
               <img src="assets/ember-dragon.png.png?v=pages-1" alt="Ember Dragon" />
             </div>
@@ -131,7 +141,7 @@
             <a class="card-link" href="index.html#commander">Commander</a>
           </article>
 
-          <article class="product-card portal product-card-large" data-product-category="skins">
+          <article class="product-card portal product-card-large" data-product-category="skins" data-title="Divin Portal" data-price="6.5">
             <div class="product-image product-image-portal">
               <img src="assets/divine-portal.webp?v=pages-1" alt="Divin Portal" />
             </div>
@@ -147,7 +157,7 @@
             <a class="card-link" href="index.html#commander">Commander</a>
           </article>
 
-          <article class="product-card product-card-large diamond-card rose-diamond" data-product-category="skins">
+          <article class="product-card product-card-large diamond-card rose-diamond" data-product-category="skins" data-title="Rose Quartz Diamond" data-price="4">
             <div class="product-image product-image-diamond">
               <img src="assets/rose-quartz-diamond.webp?v=diamonds-1" alt="Rose Quartz Diamond" />
             </div>
@@ -163,7 +173,7 @@
             <a class="card-link" href="index.html#commander">Commander</a>
           </article>
 
-          <article class="product-card product-card-large diamond-card emerald-diamond" data-product-category="skins">
+          <article class="product-card product-card-large diamond-card emerald-diamond" data-product-category="skins" data-title="Emerald Diamond" data-price="5">
             <div class="product-image product-image-diamond">
               <img src="assets/emerald-diamond.webp?v=diamonds-1" alt="Emerald Diamond" />
             </div>
@@ -179,7 +189,7 @@
             <a class="card-link" href="index.html#commander">Commander</a>
           </article>
 
-          <article class="product-card product-card-large diamond-card topaz-diamond" data-product-category="skins">
+          <article class="product-card product-card-large diamond-card topaz-diamond" data-product-category="skins" data-title="Topaz Diamond" data-price="5">
             <div class="product-image product-image-diamond">
               <img src="assets/topaz-diamond.webp?v=diamonds-1" alt="Topaz Diamond" />
             </div>
@@ -195,7 +205,7 @@
             <a class="card-link" href="index.html#commander">Commander</a>
           </article>
 
-          <article class="product-card product-card-large diamond-card ruby-diamond" data-product-category="skins">
+          <article class="product-card product-card-large diamond-card ruby-diamond" data-product-category="skins" data-title="Ruby Diamond" data-price="5">
             <div class="product-image product-image-diamond">
               <img src="assets/ruby-diamond.webp?v=diamonds-1" alt="Ruby Diamond" />
             </div>
@@ -213,7 +223,7 @@
 
           <article class="product-card product-card-large fruit-card" data-product-category="fruits">
             <div class="product-image product-image-fruit">
-              <img src="assets/Eagle-Matrix.webp?v=fruits-1" alt="Eagle Matrix" />
+              <img src="assets/Eagle-Matrix.webp?v=sort-1" alt="Eagle Matrix" />
             </div>
             <div class="product-top">
               <span class="product-tag">Fruit</span>
@@ -226,7 +236,7 @@
 
           <article class="product-card product-card-large fruit-card" data-product-category="fruits">
             <div class="product-image product-image-fruit">
-              <img src="assets/Eagle-Requiem.png?v=fruits-1" alt="Requiem Eagle" />
+              <img src="assets/Eagle-Requiem.png?v=sort-1" alt="Requiem Eagle" />
             </div>
             <div class="product-top">
               <span class="product-tag">Fruit</span>
@@ -239,7 +249,7 @@
 
           <article class="product-card product-card-large fruit-card" data-product-category="fruits">
             <div class="product-image product-image-fruit">
-              <img src="assets/eagle-glacier.webp?v=fruits-1" alt="Eagle Glacier" />
+              <img src="assets/eagle-glacier.webp?v=sort-1" alt="Eagle Glacier" />
             </div>
             <div class="product-top">
               <span class="product-tag">Fruit</span>
@@ -252,7 +262,7 @@
 
           <article class="product-card product-card-large fruit-card" data-product-category="fruits">
             <div class="product-image product-image-fruit">
-              <img src="assets/parrot-eagle.webp?v=fruits-1" alt="Eagle Parrot" />
+              <img src="assets/parrot-eagle.webp?v=sort-1" alt="Eagle Parrot" />
             </div>
             <div class="product-top">
               <span class="product-tag">Fruit</span>
@@ -265,7 +275,7 @@
 
           <article class="product-card product-card-large fruit-card" data-product-category="fruits">
             <div class="product-image product-image-fruit">
-              <img src="assets/fiend-yeti.webp?v=fruits-1" alt="Fiend Yeti" />
+              <img src="assets/fiend-yeti.webp?v=sort-1" alt="Fiend Yeti" />
             </div>
             <div class="product-top">
               <span class="product-tag">Fruit</span>
@@ -278,7 +288,7 @@
 
           <article class="product-card product-card-large fruit-card" data-product-category="fruits">
             <div class="product-image product-image-fruit">
-              <img src="assets/green-lightning.webp?v=fruits-1" alt="Green Lightning" />
+              <img src="assets/green-lightning.webp?v=sort-1" alt="Green Lightning" />
             </div>
             <div class="product-top">
               <span class="product-tag">Fruit</span>
@@ -291,7 +301,7 @@
 
           <article class="product-card product-card-large fruit-card" data-product-category="fruits">
             <div class="product-image product-image-fruit">
-              <img src="assets/Yellow-Lightning.webp?v=fruits-1" alt="Yellow Lightning" />
+              <img src="assets/Yellow-Lightning.webp?v=sort-1" alt="Yellow Lightning" />
             </div>
             <div class="product-top">
               <span class="product-tag">Fruit</span>
@@ -304,7 +314,7 @@
 
           <article class="product-card product-card-large fruit-card" data-product-category="fruits">
             <div class="product-image product-image-fruit">
-              <img src="assets/Red-Lightning.webp?v=fruits-1" alt="Red Lightning" />
+              <img src="assets/Red-Lightning.webp?v=sort-1" alt="Red Lightning" />
             </div>
             <div class="product-top">
               <span class="product-tag">Fruit</span>
@@ -317,7 +327,7 @@
 
           <article class="product-card product-card-large fruit-card" data-product-category="fruits">
             <div class="product-image product-image-fruit">
-              <img src="assets/purple-lightning.webp?v=fruits-1" alt="Purple Lightning" />
+              <img src="assets/purple-lightning.webp?v=sort-1" alt="Purple Lightning" />
             </div>
             <div class="product-top">
               <span class="product-tag">Fruit</span>
@@ -330,7 +340,7 @@
 
           <article class="product-card product-card-large fruit-card" data-product-category="fruits">
             <div class="product-image product-image-fruit">
-              <img src="assets/celestial-pain.png?v=fruits-1" alt="Celestial Pain" />
+              <img src="assets/celestial-pain.png?v=sort-1" alt="Celestial Pain" />
             </div>
             <div class="product-top">
               <span class="product-tag">Fruit</span>
@@ -343,7 +353,7 @@
 
           <article class="product-card product-card-large fruit-card" data-product-category="fruits">
             <div class="product-image product-image-fruit">
-              <img src="assets/frustration-pain.webp?v=fruits-1" alt="Frustration Pain" />
+              <img src="assets/frustration-pain.webp?v=sort-1" alt="Frustration Pain" />
             </div>
             <div class="product-top">
               <span class="product-tag">Fruit</span>
@@ -356,7 +366,7 @@
 
           <article class="product-card product-card-large fruit-card" data-product-category="fruits">
             <div class="product-image product-image-fruit">
-              <img src="assets/sadness-pain.webp?v=fruits-1" alt="Sadness Pain" />
+              <img src="assets/sadness-pain.webp?v=sort-1" alt="Sadness Pain" />
             </div>
             <div class="product-top">
               <span class="product-tag">Fruit</span>
@@ -369,7 +379,7 @@
 
           <article class="product-card product-card-large fruit-card" data-product-category="fruits">
             <div class="product-image product-image-fruit">
-              <img src="assets/super-spirit-pain.png?v=fruits-1" alt="Super Spirit" />
+              <img src="assets/super-spirit-pain.png?v=sort-1" alt="Super Spirit" />
             </div>
             <div class="product-top">
               <span class="product-tag">Fruit</span>
@@ -382,7 +392,7 @@
 
           <article class="product-card product-card-large fruit-card" data-product-category="fruits">
             <div class="product-image product-image-fruit">
-              <img src="assets/torment-pain.webp?v=fruits-1" alt="Torment Pain" />
+              <img src="assets/torment-pain.webp?v=sort-1" alt="Torment Pain" />
             </div>
             <div class="product-top">
               <span class="product-tag">Fruit</span>
@@ -395,7 +405,7 @@
 
           <article class="product-card product-card-large fruit-card" data-product-category="fruits">
             <div class="product-image product-image-fruit">
-              <img src="assets/werewolf.webp?v=fruits-1" alt="Werewolf" />
+              <img src="assets/werewolf.webp?v=sort-1" alt="Werewolf" />
             </div>
             <div class="product-top">
               <span class="product-tag">Fruit</span>
@@ -412,7 +422,7 @@
           <p>
             Les produits de cette catégorie seront ajoutés ici dès qu'ils seront prêts.
           </p>
-          <a class="button button-primary" href="category.html?category=skins&v=fruits-1">Voir les skins</a>
+          <a class="button button-primary" href="category.html?category=skins&v=sort-1">Voir les skins</a>
         </div>
       </section>
     </main>
@@ -422,6 +432,6 @@
       <a href="index.html">Accueil</a>
     </footer>
 
-    <script src="script.js?v=fruits-1"></script>
+    <script src="script.js?v=sort-1"></script>
   </body>
 </html>

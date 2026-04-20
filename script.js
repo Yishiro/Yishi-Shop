@@ -9,8 +9,11 @@ const categoryTitle = document.querySelector("[data-category-title]");
 const categoryCopy = document.querySelector("[data-category-copy]");
 const categoryLinks = document.querySelectorAll("[data-category-link]");
 const productCards = document.querySelectorAll("[data-product-category]");
+const productContainer = document.querySelector("[data-products]");
+const productSort = document.querySelector("[data-product-sort]");
 const emptyState = document.querySelector("[data-empty-state]");
 const emptyTitle = document.querySelector("[data-empty-title]");
+const sortModes = ["price-asc", "price-desc", "name-asc", "name-desc"];
 
 const categories = {
   skins: {
@@ -67,12 +70,55 @@ if (catalogMenu) {
   });
 }
 
+const getProductTitle = (card) => {
+  const title = card.dataset.title || card.querySelector("h3")?.textContent || "";
+  return title.trim().toLocaleLowerCase("fr");
+};
+
+const getProductPrice = (card) => {
+  const rawPrice =
+    card.dataset.price || card.querySelector(".price")?.textContent || "0";
+  return Number(rawPrice.replace(",", ".").replace(/[^\d.]/g, ""));
+};
+
+const sortProducts = (sortMode = "price-asc") => {
+  if (!productContainer || !productCards.length) {
+    return;
+  }
+
+  const sortedCards = Array.from(productCards).sort((first, second) => {
+    const firstTitle = getProductTitle(first);
+    const secondTitle = getProductTitle(second);
+    const firstPrice = getProductPrice(first);
+    const secondPrice = getProductPrice(second);
+
+    if (sortMode === "name-asc") {
+      return firstTitle.localeCompare(secondTitle, "fr");
+    }
+
+    if (sortMode === "name-desc") {
+      return secondTitle.localeCompare(firstTitle, "fr");
+    }
+
+    if (sortMode === "price-desc") {
+      return secondPrice - firstPrice || firstTitle.localeCompare(secondTitle, "fr");
+    }
+
+    return firstPrice - secondPrice || firstTitle.localeCompare(secondTitle, "fr");
+  });
+
+  sortedCards.forEach((card) => productContainer.appendChild(card));
+};
+
 if (categoryTitle && productCards.length) {
   const params = new URLSearchParams(window.location.search);
   const selectedCategory = categories[params.get("category")]
     ? params.get("category")
     : "skins";
   const selected = categories[selectedCategory];
+  const selectedSort = sortModes.includes(params.get("sort"))
+    ? params.get("sort")
+    : "price-asc";
   let visibleProducts = 0;
 
   document.title = `${selected.title} | Yishi's Shop`;
@@ -97,6 +143,20 @@ if (categoryTitle && productCards.length) {
       visibleProducts += 1;
     }
   });
+
+  if (productSort) {
+    productSort.value = selectedSort;
+    productSort.addEventListener("change", () => {
+      const nextParams = new URLSearchParams(window.location.search);
+      nextParams.set("category", selectedCategory);
+      nextParams.set("sort", productSort.value);
+      nextParams.set("v", "sort-1");
+      window.history.replaceState(null, "", `?${nextParams.toString()}`);
+      sortProducts(productSort.value);
+    });
+  }
+
+  sortProducts(selectedSort);
 
   if (emptyState) {
     emptyState.hidden = visibleProducts > 0;

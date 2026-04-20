@@ -420,6 +420,30 @@ h3 {
   color: var(--ink);
 }
 
+.sort-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 22px;
+}
+
+.sort-bar label {
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.sort-bar select {
+  min-height: 42px;
+  padding: 9px 36px 9px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 800;
+}
+
 .empty-state {
   max-width: 720px;
   padding: 28px;
