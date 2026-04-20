@@ -1,4 +1,4 @@
-const discordInviteUrl = "https://discord.gg/ton-lien";
+const discordInviteUrl = "https://discord.gg/yGMfuCsfNC";
 
 const navToggle = document.querySelector(".nav-toggle");
 const siteNav = document.querySelector(".site-nav");
