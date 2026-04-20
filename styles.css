@@ -279,7 +279,7 @@ h3 {
 }
 
 .products {
-  grid-template-columns: minmax(280px, 440px);
+  grid-template-columns: repeat(2, minmax(280px, 440px));
   justify-content: center;
 }
 
@@ -318,9 +318,22 @@ h3 {
   object-fit: contain;
 }
 
+.product-image-crimson {
+  background: #130708;
+}
+
+.product-image-crimson img {
+  filter: hue-rotate(110deg) saturate(1.35);
+}
+
 .product-card.featured {
   border-color: rgba(22, 184, 199, 0.45);
   box-shadow: 0 24px 60px rgba(22, 184, 199, 0.16);
+}
+
+.product-card.crimson {
+  border-color: rgba(220, 48, 69, 0.42);
+  box-shadow: 0 24px 60px rgba(220, 48, 69, 0.14);
 }
 
 .product-top {
