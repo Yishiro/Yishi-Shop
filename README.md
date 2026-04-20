@@ -17,6 +17,21 @@ Site vitrine statique pour une boutique Discord.
 - `assets/emerald-diamond.webp` : image du produit Emerald Diamond
 - `assets/topaz-diamond.webp` : image du produit Topaz Diamond
 - `assets/ruby-diamond.webp` : image du produit Ruby Diamond
+- `assets/Eagle-Matrix.webp` : image du produit Eagle Matrix
+- `assets/Eagle-Requiem.png` : image du produit Requiem Eagle
+- `assets/eagle-glacier.webp` : image du produit Eagle Glacier
+- `assets/parrot-eagle.webp` : image du produit Eagle Parrot
+- `assets/fiend-yeti.webp` : image du produit Fiend Yeti
+- `assets/green-lightning.webp` : image du produit Green Lightning
+- `assets/Yellow-Lightning.webp` : image du produit Yellow Lightning
+- `assets/Red-Lightning.webp` : image du produit Red Lightning
+- `assets/purple-lightning.webp` : image du produit Purple Lightning
+- `assets/celestial-pain.png` : image du produit Celestial Pain
+- `assets/frustration-pain.webp` : image du produit Frustration Pain
+- `assets/sadness-pain.webp` : image du produit Sadness Pain
+- `assets/super-spirit-pain.png` : image du produit Super Spirit
+- `assets/torment-pain.webp` : image du produit Torment Pain
+- `assets/werewolf.webp` : image du produit Werewolf
 
 ## Modifier le lien Discord
 

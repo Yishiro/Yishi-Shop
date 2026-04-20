@@ -498,6 +498,10 @@ h3 {
   background: #090a10;
 }
 
+.product-image-fruit {
+  background: #090d14;
+}
+
 .product-card.featured {
   border-color: rgba(22, 184, 199, 0.45);
   box-shadow: 0 24px 60px rgba(22, 184, 199, 0.16);
@@ -540,6 +544,11 @@ h3 {
 .ruby-diamond {
   border-color: rgba(209, 47, 64, 0.42);
   box-shadow: 0 24px 60px rgba(209, 47, 64, 0.12);
+}
+
+.fruit-card {
+  border-color: rgba(31, 154, 211, 0.34);
+  box-shadow: 0 24px 60px rgba(31, 154, 211, 0.1);
 }
 
 .product-top {
