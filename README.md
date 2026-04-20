@@ -1,4 +1,4 @@
-# Yishi's Shop
+﻿# Yishi's Shop
 
 Site vitrine statique pour une boutique Discord.
 
@@ -24,7 +24,7 @@ par le vrai lien d'invitation de ton serveur.
 1. Envoie ces fichiers dans ton repository GitHub.
 2. Va dans `Settings` puis `Pages`.
 3. Dans `Build and deployment`, choisis `Deploy from a branch`.
-4. Sélectionne la branche `main` et le dossier `/root`.
+4. Selectionne la branche `main` et le dossier `/root`.
 5. Clique sur `Save`.
 
 GitHub donnera ensuite une URL publique pour le site.
