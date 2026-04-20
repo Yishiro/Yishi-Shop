@@ -10,7 +10,7 @@ Site vitrine statique pour une boutique Discord.
 - `assets/hero-yishis-shop.png` : image principale du site
 - `assets/kitsune-galaxy.webp` : image du produit Kitsune Galaxy
 - `assets/kitsune-crimson.png.webp` : image du produit Kitsune Crimson
-- `assets/ember-dragon.png.webp` : image du produit Ember Dragon
+- `assets/ember-dragon.png.png` : image du produit Ember Dragon
 
 ## Modifier le lien Discord
 
