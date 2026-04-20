@@ -279,7 +279,7 @@ h3 {
 }
 
 .products {
-  grid-template-columns: repeat(3, minmax(260px, 1fr));
+  grid-template-columns: repeat(4, minmax(220px, 1fr));
   justify-content: center;
 }
 
@@ -328,6 +328,10 @@ h3 {
   background: #170b06;
 }
 
+.product-image-portal {
+  background: #080b18;
+}
+
 .product-card.featured {
   border-color: rgba(22, 184, 199, 0.45);
   box-shadow: 0 24px 60px rgba(22, 184, 199, 0.16);
@@ -341,6 +345,11 @@ h3 {
 .product-card.ember {
   border-color: rgba(236, 112, 35, 0.42);
   box-shadow: 0 24px 60px rgba(236, 112, 35, 0.14);
+}
+
+.product-card.portal {
+  border-color: rgba(102, 92, 214, 0.42);
+  box-shadow: 0 24px 60px rgba(102, 92, 214, 0.14);
 }
 
 .product-top {
