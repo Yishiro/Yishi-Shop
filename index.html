@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Yishi's Shop, boutique en ligne pour services Discord, configurations, packs communautaires et accompagnement."
+    />
+    <title>Yishi's Shop | Boutique Discord</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header" data-header>
+      <a class="brand" href="#top" aria-label="Retour en haut">
+        <span class="brand-mark">YS</span>
+        <span>Yishi's Shop</span>
+      </a>
+
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
+      <nav class="site-nav" id="site-nav">
+        <a href="#offres">Offres</a>
+        <a href="#avis">Avis</a>
+        <a href="#faq">FAQ</a>
+        <a class="nav-cta" href="#commander">Commander</a>
+      </nav>
+    </header>
+
+    <main id="top">
+      <section class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">Boutique en ligne pour communautés Discord</p>
+          <h1>Yishi's Shop</h1>
+          <p class="hero-text">
+            Services rapides et soignés pour améliorer ton serveur : configuration,
+            packs premium, supports, bots et accompagnement personnalisé.
+          </p>
+          <div class="hero-actions">
+            <a class="button button-primary" href="#offres">Voir les offres</a>
+            <a class="button button-secondary" href="#commander">Rejoindre le shop</a>
+          </div>
+          <dl class="hero-stats" aria-label="Points forts">
+            <div>
+              <dt>24h</dt>
+              <dd>Réponse rapide</dd>
+            </div>
+            <div>
+              <dt>100%</dt>
+              <dd>Sur mesure</dd>
+            </div>
+            <div>
+              <dt>FR</dt>
+              <dd>Support clair</dd>
+            </div>
+          </dl>
+        </div>
+
+        <div class="hero-media" aria-label="Aperçu visuel de Yishi's Shop">
+          <img src="assets/hero-yishis-shop.png" alt="" />
+        </div>
+      </section>
+
+      <section class="trust-band" aria-label="Garanties">
+        <p>Paiement sécurisé</p>
+        <p>Livraison claire</p>
+        <p>Support après achat</p>
+        <p>Offres personnalisables</p>
+      </section>
+
+      <section class="section" id="offres">
+        <div class="section-heading">
+          <p class="eyebrow">Catalogue</p>
+          <h2>Choisis l'offre qui correspond à ton serveur</h2>
+          <p>
+            Remplace les prix et les descriptions quand tes vrais produits sont prêts.
+            La structure est déjà pensée pour une boutique Discord.
+          </p>
+        </div>
+
+        <div class="products">
+          <article class="product-card">
+            <div class="product-top">
+              <span class="product-tag">Starter</span>
+              <span class="price">4,99 €</span>
+            </div>
+            <h3>Pack Setup Serveur</h3>
+            <p>
+              Création des salons, rôles, permissions et base propre pour lancer
+              une communauté organisée.
+            </p>
+            <ul>
+              <li>Structure complète</li>
+              <li>Rôles et permissions</li>
+              <li>Conseils de lancement</li>
+            </ul>
+            <a class="card-link" href="#commander">Commander</a>
+          </article>
+
+          <article class="product-card featured">
+            <div class="product-top">
+              <span class="product-tag">Populaire</span>
+              <span class="price">9,99 €</span>
+            </div>
+            <h3>Pack Premium Shop</h3>
+            <p>
+              Une configuration plus poussée avec catégories, embeds, salons utiles
+              et expérience plus professionnelle.
+            </p>
+            <ul>
+              <li>Design serveur amélioré</li>
+              <li>Embeds de présentation</li>
+              <li>Optimisation boutique</li>
+            </ul>
+            <a class="card-link" href="#commander">Commander</a>
+          </article>
+
+          <article class="product-card">
+            <div class="product-top">
+              <span class="product-tag">Custom</span>
+              <span class="price">Sur devis</span>
+            </div>
+            <h3>Service Personnalisé</h3>
+            <p>
+              Besoin d'un bot, d'un système ticket, d'une boutique complète ou
+              d'un accompagnement précis ? On prépare une offre adaptée.
+            </p>
+            <ul>
+              <li>Devis rapide</li>
+              <li>Objectifs définis ensemble</li>
+              <li>Livraison suivie</li>
+            </ul>
+            <a class="card-link" href="#commander">Demander un devis</a>
+          </article>
+        </div>
+      </section>
+
+      <section class="section split-section" id="commander">
+        <div>
+          <p class="eyebrow">Commande</p>
+          <h2>Commande directement via le serveur</h2>
+          <p>
+            Clique sur le bouton, ouvre un ticket et indique l'offre qui t'intéresse.
+            Tu peux aussi demander une version personnalisée si ton projet est spécial.
+          </p>
+        </div>
+        <div class="order-panel">
+          <h3>Avant de commander</h3>
+          <ol>
+            <li>Prépare le nom de ton serveur.</li>
+            <li>Choisis une offre ou décris ton besoin.</li>
+            <li>Ouvre un ticket sur le shop.</li>
+          </ol>
+          <a class="button button-primary full-width" data-discord-link href="#">Ouvrir Discord</a>
+          <p class="fine-print">
+            Pense à remplacer le lien du bouton dans <code>script.js</code>.
+          </p>
+        </div>
+      </section>
+
+      <section class="section" id="avis">
+        <div class="section-heading">
+          <p class="eyebrow">Avis clients</p>
+          <h2>Une boutique claire, rapide et sérieuse</h2>
+        </div>
+
+        <div class="reviews">
+          <figure>
+            <blockquote>
+              "Serveur propre, rôles bien rangés et livraison rapide. Très bon suivi."
+            </blockquote>
+            <figcaption>Client Yishi's Shop</figcaption>
+          </figure>
+          <figure>
+            <blockquote>
+              "Le setup boutique m'a fait gagner beaucoup de temps. Tout est simple."
+            </blockquote>
+            <figcaption>Commande premium</figcaption>
+          </figure>
+          <figure>
+            <blockquote>
+              "Explications claires et résultat pro. Je recommande pour démarrer."
+            </blockquote>
+            <figcaption>Serveur communautaire</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section class="section faq" id="faq">
+        <div class="section-heading">
+          <p class="eyebrow">FAQ</p>
+          <h2>Questions fréquentes</h2>
+        </div>
+
+        <details>
+          <summary>Comment se passe une commande ?</summary>
+          <p>
+            Tu ouvres un ticket sur le serveur, tu expliques ton besoin, puis tu
+            reçois les étapes, le prix final et le délai.
+          </p>
+        </details>
+        <details>
+          <summary>Est-ce que les offres sont personnalisables ?</summary>
+          <p>
+            Oui. Les packs servent de base, mais tu peux demander une version
+            adaptée à ton serveur.
+          </p>
+        </details>
+        <details>
+          <summary>Le site peut-il être publié gratuitement ?</summary>
+          <p>
+            Oui. Avec GitHub Pages, ce site peut être mis en ligne gratuitement
+            depuis ton repository HTML.
+          </p>
+        </details>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <p>© <span data-year></span> Yishi's Shop. Tous droits réservés.</p>
+      <a href="#top">Retour en haut</a>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>
