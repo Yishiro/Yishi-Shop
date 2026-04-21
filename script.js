@@ -74,6 +74,22 @@ discordLinks.forEach((link) => {
 });
 
 if (catalogMenu) {
+  const gameMenus = catalogMenu.querySelectorAll(".game-menu");
+
+  gameMenus.forEach((menu) => {
+    menu.addEventListener("toggle", () => {
+      if (!menu.open) {
+        return;
+      }
+
+      gameMenus.forEach((otherMenu) => {
+        if (otherMenu !== menu) {
+          otherMenu.removeAttribute("open");
+        }
+      });
+    });
+  });
+
   catalogMenu.querySelectorAll("a").forEach((link) => {
     link.addEventListener("click", () => {
       catalogMenu.removeAttribute("open");
