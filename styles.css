@@ -530,6 +530,10 @@ h3 {
   background: #090d14;
 }
 
+.product-image-token {
+  background: #0d0914;
+}
+
 .product-card.featured {
   border-color: rgba(22, 184, 199, 0.45);
   box-shadow: 0 24px 60px rgba(22, 184, 199, 0.16);
@@ -577,6 +581,11 @@ h3 {
 .fruit-card {
   border-color: rgba(31, 154, 211, 0.34);
   box-shadow: 0 24px 60px rgba(31, 154, 211, 0.1);
+}
+
+.token-card {
+  border-color: rgba(147, 91, 255, 0.42);
+  box-shadow: 0 24px 60px rgba(147, 91, 255, 0.12);
 }
 
 .product-top {

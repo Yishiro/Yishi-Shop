@@ -6,6 +6,7 @@ const year = document.querySelector("[data-year]");
 const discordLinks = document.querySelectorAll("[data-discord-link]");
 const catalogMenu = document.querySelector(".catalog-menu");
 const categoryTitle = document.querySelector("[data-category-title]");
+const categoryGame = document.querySelector("[data-category-game]");
 const categoryCopy = document.querySelector("[data-category-copy]");
 const categoryLinks = document.querySelectorAll("[data-category-link]");
 const productCards = document.querySelectorAll("[data-product-category]");
@@ -17,24 +18,34 @@ const sortModes = ["price-asc", "price-desc", "name-asc", "name-desc"];
 
 const categories = {
   skins: {
+    game: "Blox Fruit",
     title: "Skins",
     copy: "Retrouve les skins Blox Fruit disponibles sur Yishi's Shop.",
   },
   fruits: {
+    game: "Blox Fruit",
     title: "Fruits",
     copy: "Retrouve les fruits Blox Fruit disponibles sur Yishi's Shop.",
   },
   permanents: {
+    game: "Blox Fruit",
     title: "Permanents",
     copy: "Retrouve les permanents Blox Fruit disponibles sur Yishi's Shop.",
   },
   gamepass: {
+    game: "Blox Fruit",
     title: "Gamepass",
     copy: "Retrouve les gamepass Blox Fruit disponibles sur Yishi's Shop.",
   },
   boosts: {
+    game: "Blox Fruit",
     title: "Boosts",
     copy: "Retrouve les boosts Blox Fruit disponibles sur Yishi's Shop.",
+  },
+  token: {
+    game: "Blade Ball",
+    title: "Token",
+    copy: "Retrouve les tokens Blade Ball disponibles sur Yishi's Shop.",
   },
 };
 
@@ -124,6 +135,10 @@ if (categoryTitle && productCards.length) {
   document.title = `${selected.title} | Yishi's Shop`;
   categoryTitle.textContent = selected.title;
 
+  if (categoryGame) {
+    categoryGame.textContent = selected.game;
+  }
+
   if (categoryCopy) {
     categoryCopy.textContent = selected.copy;
   }
@@ -150,7 +165,7 @@ if (categoryTitle && productCards.length) {
       const nextParams = new URLSearchParams(window.location.search);
       nextParams.set("category", selectedCategory);
       nextParams.set("sort", productSort.value);
-      nextParams.set("v", "category-filter-1");
+      nextParams.set("v", "bladeball-1");
       window.history.replaceState(null, "", `?${nextParams.toString()}`);
       sortProducts(productSort.value);
     });
