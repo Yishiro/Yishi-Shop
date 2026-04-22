@@ -534,6 +534,10 @@ h3 {
   background: #0d0914;
 }
 
+.product-image-tech {
+  background: #090910;
+}
+
 .product-card.featured {
   border-color: rgba(22, 184, 199, 0.45);
   box-shadow: 0 24px 60px rgba(22, 184, 199, 0.16);
@@ -586,6 +590,11 @@ h3 {
 .token-card {
   border-color: rgba(147, 91, 255, 0.42);
   box-shadow: 0 24px 60px rgba(147, 91, 255, 0.12);
+}
+
+.tech-card {
+  border-color: rgba(93, 232, 183, 0.42);
+  box-shadow: 0 24px 60px rgba(93, 232, 183, 0.12);
 }
 
 .product-top {

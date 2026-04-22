@@ -186,7 +186,7 @@ if (categoryTitle && productCards.length) {
       const nextParams = new URLSearchParams(window.location.search);
       nextParams.set("category", selectedCategory);
       nextParams.set("sort", productSort.value);
-      nextParams.set("v", "t3ch-1");
+      nextParams.set("v", "t3ch-2");
       window.history.replaceState(null, "", `?${nextParams.toString()}`);
       sortProducts(productSort.value);
     });
