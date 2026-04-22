@@ -47,6 +47,11 @@ const categories = {
     title: "Token",
     copy: "Retrouve les tokens Blade Ball disponibles sur Yishi's Shop.",
   },
+  "t3ch-products": {
+    game: "T3CH",
+    title: "Produits",
+    copy: "Retrouve les produits T3CH disponibles sur Yishi's Shop.",
+  },
 };
 
 if (year) {
@@ -181,7 +186,7 @@ if (categoryTitle && productCards.length) {
       const nextParams = new URLSearchParams(window.location.search);
       nextParams.set("category", selectedCategory);
       nextParams.set("sort", productSort.value);
-      nextParams.set("v", "bladeball-1");
+      nextParams.set("v", "t3ch-1");
       window.history.replaceState(null, "", `?${nextParams.toString()}`);
       sortProducts(productSort.value);
     });
