@@ -151,7 +151,22 @@ if (categoryTitle && productCards.length) {
   const selectedSort = sortModes.includes(params.get("sort"))
     ? params.get("sort")
     : "price-asc";
-  let visibleProducts = 0;
+  const updateVisibleProducts = () => {
+    let visibleProducts = 0;
+
+    productCards.forEach((card) => {
+      const isVisible = card.dataset.productCategory === selectedCategory;
+      card.hidden = !isVisible;
+
+      if (isVisible) {
+        visibleProducts += 1;
+      }
+    });
+
+    if (emptyState) {
+      emptyState.hidden = visibleProducts > 0;
+    }
+  };
 
   document.title = `${selected.title} | Yishi's Shop`;
   categoryTitle.textContent = selected.title;
@@ -171,32 +186,21 @@ if (categoryTitle && productCards.length) {
     );
   });
 
-  productCards.forEach((card) => {
-    const isVisible = card.dataset.productCategory === selectedCategory;
-    card.hidden = !isVisible;
-
-    if (isVisible) {
-      visibleProducts += 1;
-    }
-  });
-
   if (productSort) {
     productSort.value = selectedSort;
     productSort.addEventListener("change", () => {
       const nextParams = new URLSearchParams(window.location.search);
       nextParams.set("category", selectedCategory);
       nextParams.set("sort", productSort.value);
-      nextParams.set("v", "t3ch-2");
+      nextParams.set("v", "t3ch-3");
       window.history.replaceState(null, "", `?${nextParams.toString()}`);
       sortProducts(productSort.value);
+      updateVisibleProducts();
     });
   }
 
   sortProducts(selectedSort);
-
-  if (emptyState) {
-    emptyState.hidden = visibleProducts > 0;
-  }
+  updateVisibleProducts();
 
   if (emptyTitle) {
     emptyTitle.textContent = `${selected.title} bientôt disponible`;
