@@ -29,17 +29,20 @@ const summaryName = document.querySelector("[data-summary-name]");
 const summaryUnit = document.querySelector("[data-summary-unit]");
 const summaryQty = document.querySelector("[data-summary-qty]");
 const summaryTotal = document.querySelector("[data-summary-total]");
+const checkoutFeedback = document.querySelector("[data-checkout-feedback]");
 const openPaymentButton = document.querySelector("[data-open-payment]");
 const paymentModal = document.querySelector("[data-payment-modal]");
 const closePaymentButtons = document.querySelectorAll("[data-close-payment]");
 const paymentMethodButtons = document.querySelectorAll("[data-payment-method]");
 const paymentPreviewText = document.querySelector("[data-payment-preview-text]");
+const paymentSubmitButton = document.querySelector("[data-payment-submit]");
 const authForms = document.querySelectorAll("[data-auth-form]");
 const accountName = document.querySelector("[data-account-name]");
 const accountEmail = document.querySelector("[data-account-email]");
 const accountDisplay = document.querySelector("[data-account-display]");
 const accountMail = document.querySelector("[data-account-mail]");
 const accountStatus = document.querySelector("[data-account-status]");
+const accountOrders = document.querySelector("[data-account-orders]");
 const logoutButton = document.querySelector("[data-logout]");
 const sortModes = ["price-asc", "price-desc", "name-asc", "name-desc"];
 const supabaseConfig = window.YISHI_SUPABASE_CONFIG || null;
@@ -100,6 +103,101 @@ const formatPrice = (value) =>
     minimumFractionDigits: value % 1 === 0 ? 0 : 2,
     maximumFractionDigits: 2,
   }).format(value);
+
+const formatOrderDate = (value) =>
+  new Intl.DateTimeFormat("fr-FR", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(new Date(value));
+
+const getReturnToUrl = () => {
+  const params = new URLSearchParams(window.location.search);
+  return params.get("returnTo") || "account.html";
+};
+
+const isOrdersTableMissing = (error) =>
+  error?.code === "42P01" || /orders/i.test(String(error?.message || ""));
+
+const getPaymentMethodLabel = (method) =>
+  method === "paypal" ? "PayPal" : "Carte bancaire";
+
+const getOrderStatusLabel = (status) => {
+  if (status === "paid") {
+    return "Payee";
+  }
+
+  if (status === "delivered") {
+    return "Livree";
+  }
+
+  return "En attente de paiement";
+};
+
+const renderOrders = (orders = [], message) => {
+  if (!accountOrders) {
+    return;
+  }
+
+  accountOrders.innerHTML = "";
+
+  if (message) {
+    const emptyCard = document.createElement("article");
+    emptyCard.className = "account-order";
+    emptyCard.innerHTML = `<strong>${message}</strong>`;
+    accountOrders.appendChild(emptyCard);
+    return;
+  }
+
+  if (!orders.length) {
+    const emptyCard = document.createElement("article");
+    emptyCard.className = "account-order";
+    emptyCard.innerHTML =
+      "<strong>Aucune commande pour le moment</strong><span>Ton historique apparaitra ici apres tes premiers achats.</span>";
+    accountOrders.appendChild(emptyCard);
+    return;
+  }
+
+  orders.forEach((order) => {
+    const card = document.createElement("article");
+    card.className = "account-order";
+    card.innerHTML = `
+      <strong>${order.product_title}</strong>
+      <div class="account-order-meta">
+        <span>Quantite ${order.quantity}</span>
+        <span>${formatPrice(Number(order.total_price || 0))}</span>
+        <span>${getPaymentMethodLabel(order.payment_method)}</span>
+      </div>
+      <span>${getOrderStatusLabel(order.status)}</span>
+      <span>${formatOrderDate(order.created_at)}</span>
+    `;
+    accountOrders.appendChild(card);
+  });
+};
+
+const loadAccountOrders = async (user) => {
+  if (!supabaseClient || !accountOrders || !user) {
+    return;
+  }
+
+  const { data, error } = await supabaseClient
+    .from("orders")
+    .select(
+      "id, product_title, quantity, total_price, payment_method, status, created_at"
+    )
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    renderOrders(
+      [],
+      isOrdersTableMissing(error)
+        ? "Active la table orders dans Supabase pour afficher l'historique."
+        : "Impossible de charger les commandes pour le moment."
+    );
+    return;
+  }
+
+  renderOrders(data || []);
+};
 
 if (year) {
   year.textContent = new Date().getFullYear();
@@ -179,7 +277,7 @@ const getProductPayload = (card) => {
 
 const buildProductUrl = (payload) => {
   const params = new URLSearchParams(payload);
-  params.set("v", "t3ch-14");
+  params.set("v", "t3ch-15");
   return `product.html?${params.toString()}`;
 };
 
@@ -267,7 +365,7 @@ if (categoryTitle && productCards.length) {
       const nextParams = new URLSearchParams(window.location.search);
       nextParams.set("category", selectedCategory);
       nextParams.set("sort", productSort.value);
-      nextParams.set("v", "t3ch-14");
+      nextParams.set("v", "t3ch-15");
       window.history.replaceState(null, "", `?${nextParams.toString()}`);
       sortProducts(productSort.value);
       updateVisibleProducts();
@@ -304,6 +402,7 @@ if (checkoutTitle && qtyInput) {
     "Produit disponible sur le shop. Finalise ici ta commande avant le paiement.";
   const image = params.get("image") || "";
   const category = params.get("category") || "skins";
+  let selectedPaymentMethod = "";
 
   const updateCheckout = () => {
     const quantity = Math.min(99, Math.max(1, Number(qtyInput.value) || 1));
@@ -365,7 +464,7 @@ if (checkoutTitle && qtyInput) {
   if (checkoutBack) {
     checkoutBack.setAttribute(
       "href",
-      `category.html?category=${encodeURIComponent(category)}&v=t3ch-14`
+      `category.html?category=${encodeURIComponent(category)}&v=t3ch-15`
     );
   }
 
@@ -402,8 +501,40 @@ if (checkoutTitle && qtyInput) {
     document.body.classList.remove("modal-open");
   };
 
+  const updateCheckoutFeedback = (message, isError = false) => {
+    if (!checkoutFeedback) {
+      return;
+    }
+
+    checkoutFeedback.innerHTML = message;
+    checkoutFeedback.style.color = isError ? "#c2410c" : "";
+  };
+
   if (openPaymentButton) {
-    openPaymentButton.addEventListener("click", openModal);
+    openPaymentButton.addEventListener("click", async () => {
+      if (!supabaseClient) {
+        updateCheckoutFeedback(
+          "La connexion client n'est pas configuree pour le moment.",
+          true
+        );
+        return;
+      }
+
+      const {
+        data: { session },
+      } = await supabaseClient.auth.getSession();
+
+      if (!session?.user) {
+        const returnTo = encodeURIComponent(window.location.href);
+        window.location.href = `login.html?returnTo=${returnTo}`;
+        return;
+      }
+
+      updateCheckoutFeedback(
+        'En poursuivant, tu acceptes les <a href="cgv.html">CGV</a>.'
+      );
+      openModal();
+    });
   }
 
   closePaymentButtons.forEach((button) => {
@@ -414,6 +545,11 @@ if (checkoutTitle && qtyInput) {
     button.addEventListener("click", () => {
       if (!paymentPreviewText) {
         return;
+      }
+
+      selectedPaymentMethod = button.dataset.paymentMethod || "";
+      if (paymentSubmitButton) {
+        paymentSubmitButton.disabled = !selectedPaymentMethod;
       }
 
       paymentMethodButtons.forEach((item) => {
@@ -430,6 +566,70 @@ if (checkoutTitle && qtyInput) {
             )}.`;
     });
   });
+
+  if (paymentSubmitButton) {
+    paymentSubmitButton.disabled = true;
+    paymentSubmitButton.addEventListener("click", async () => {
+      if (!supabaseClient || !selectedPaymentMethod) {
+        return;
+      }
+
+      const {
+        data: { session },
+      } = await supabaseClient.auth.getSession();
+
+      if (!session?.user) {
+        const returnTo = encodeURIComponent(window.location.href);
+        window.location.href = `login.html?returnTo=${returnTo}`;
+        return;
+      }
+
+      paymentSubmitButton.disabled = true;
+      paymentSubmitButton.textContent = "Enregistrement...";
+
+      const quantity = Math.min(99, Math.max(1, Number(qtyInput.value) || 1));
+      const total = Number((price * quantity).toFixed(2));
+
+      const { error } = await supabaseClient.from("orders").insert({
+        user_id: session.user.id,
+        product_title: title,
+        product_category: category,
+        product_image: image,
+        unit_price: Number(price.toFixed(2)),
+        quantity,
+        total_price: total,
+        payment_method: selectedPaymentMethod,
+        status: "pending_payment",
+      });
+
+      if (error) {
+        updateCheckoutFeedback(
+          isOrdersTableMissing(error)
+            ? "Il faut d'abord creer la table orders dans Supabase avec le fichier supabase-orders.sql."
+            : "Impossible d'enregistrer la commande pour le moment.",
+          true
+        );
+        paymentSubmitButton.disabled = false;
+        paymentSubmitButton.textContent = "Continuer";
+        return;
+      }
+
+      closeModal();
+      updateCheckoutFeedback(
+        'Commande enregistree sur ton compte. Tu peux la retrouver dans <a href="account.html">Mon compte</a>.'
+      );
+      paymentSubmitButton.disabled = true;
+      paymentSubmitButton.textContent = "Continuer";
+      selectedPaymentMethod = "";
+      paymentMethodButtons.forEach((item) => {
+        item.classList.remove("is-selected");
+      });
+      if (paymentPreviewText) {
+        paymentPreviewText.textContent =
+          "Commande enregistree. Le paiement Stripe ou PayPal sera branche ici a l'etape suivante.";
+      }
+    });
+  }
 
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape") {
@@ -492,6 +692,8 @@ const applyAccountView = (user) => {
       });
     }
 
+    loadAccountOrders(user);
+
     return;
   }
 
@@ -516,6 +718,8 @@ const applyAccountView = (user) => {
       ? "Connexion requise"
       : "Configuration requise";
   }
+
+  renderOrders([]);
 };
 
 const handleSupabaseAuth = async () => {
@@ -543,13 +747,14 @@ const handleSupabaseAuth = async () => {
 
   if (currentPath.endsWith("/account.html")) {
     if (!currentUser) {
-      window.location.href = "login.html";
+      const returnTo = encodeURIComponent(window.location.href);
+      window.location.href = `login.html?returnTo=${returnTo}`;
       return;
     }
 
     applyAccountView(currentUser);
   } else if (currentUser) {
-    window.location.href = "account.html";
+    window.location.href = getReturnToUrl();
     return;
   }
 
@@ -588,7 +793,9 @@ const handleSupabaseAuth = async () => {
           "Compte cree. Verifie aussi ton email si Supabase demande une confirmation, puis reconnecte-toi."
         );
         window.setTimeout(() => {
-          window.location.href = "login.html";
+          window.location.href = `login.html?returnTo=${encodeURIComponent(
+            getReturnToUrl()
+          )}`;
         }, 1200);
         return;
       }
@@ -605,7 +812,7 @@ const handleSupabaseAuth = async () => {
 
       setAuthFeedback(form, "Connexion reussie. Redirection vers ton espace client...");
       window.setTimeout(() => {
-        window.location.href = "account.html";
+        window.location.href = getReturnToUrl();
       }, 500);
     });
   });
