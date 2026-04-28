@@ -280,7 +280,7 @@ const getProductPayload = (card) => {
 
 const buildProductUrl = (payload) => {
   const params = new URLSearchParams(payload);
-  params.set("v", "t3ch-15");
+  params.set("v", "t3ch-16");
   return `product.html?${params.toString()}`;
 };
 
@@ -368,7 +368,7 @@ if (categoryTitle && productCards.length) {
       const nextParams = new URLSearchParams(window.location.search);
       nextParams.set("category", selectedCategory);
       nextParams.set("sort", productSort.value);
-      nextParams.set("v", "t3ch-15");
+      nextParams.set("v", "t3ch-16");
       window.history.replaceState(null, "", `?${nextParams.toString()}`);
       sortProducts(productSort.value);
       updateVisibleProducts();
@@ -467,7 +467,7 @@ if (checkoutTitle && qtyInput) {
   if (checkoutBack) {
     checkoutBack.setAttribute(
       "href",
-      `category.html?category=${encodeURIComponent(category)}&v=t3ch-15`
+      `category.html?category=${encodeURIComponent(category)}&v=t3ch-16`
     );
   }
 
@@ -947,3 +947,4 @@ const handleSupabaseAuth = async () => {
 };
 
 handleSupabaseAuth();
+
