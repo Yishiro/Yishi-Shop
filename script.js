@@ -51,14 +51,19 @@ const adminEntries = document.querySelectorAll("[data-admin-entry]");
 const adminStats = document.querySelector("[data-admin-stats]");
 const adminSearch = document.querySelector("[data-admin-search]");
 const adminFilter = document.querySelector("[data-admin-filter]");
+const adminDetail = document.querySelector("[data-admin-detail]");
+const adminDetailEmpty = document.querySelector("[data-admin-detail-empty]");
 const conversationThread = document.querySelector("[data-conversation-thread]");
 const conversationForm = document.querySelector("[data-conversation-form]");
 const conversationEmpty = document.querySelector("[data-conversation-empty]");
+const conversationActions = document.querySelector("[data-conversation-actions]");
+const markReadButton = document.querySelector("[data-mark-read]");
 const logoutButton = document.querySelector("[data-logout]");
 const sortModes = ["price-asc", "price-desc", "name-asc", "name-desc"];
 const adminEmail = "yishiroof@gmail.com";
 let activeConversationOrderId = "";
 let activeConversationMode = "";
+let activeConversationUnread = 0;
 let currentAccountOrders = [];
 let currentAdminOrders = [];
 const supabaseConfig = window.YISHI_SUPABASE_CONFIG || null;
@@ -207,6 +212,14 @@ const renderTrackingMarkup = (status) =>
     )
     .join("");
 
+const getUnreadCount = (order, mode) =>
+  mode === "admin"
+    ? Number(order?.unread_for_admin || 0)
+    : Number(order?.unread_for_buyer || 0);
+
+const renderUnreadBadge = (count) =>
+  count > 0 ? `<span class="message-badge">${count} nouveau${count > 1 ? "x" : ""}</span>` : "";
+
 const updateAdminEntries = (isAdmin) => {
   adminEntries.forEach((entry) => {
     entry.hidden = !isAdmin;
@@ -239,6 +252,7 @@ const renderOrders = (orders = [], message) => {
   }
 
   currentAccountOrders.forEach((order) => {
+    const unreadCount = getUnreadCount(order, "buyer");
     const card = document.createElement("article");
     card.className = "account-order";
     card.innerHTML = `
@@ -253,6 +267,7 @@ const renderOrders = (orders = [], message) => {
         <span>${getPaymentMethodLabel(order.payment_method)}</span>
       </div>
       <div class="tracking-steps">${renderTrackingMarkup(order.status)}</div>
+      ${unreadCount > 0 ? `<div class="message-meta-row">${renderUnreadBadge(unreadCount)}</div>` : ""}
       <div class="account-actions">
         <button type="button" class="button button-secondary" data-open-conversation="${order.id}">Voir la discussion</button>
       </div>
@@ -275,6 +290,7 @@ const renderAdminOrders = (orders = [], message) => {
     card.className = "account-order";
     card.innerHTML = `<strong>${message}</strong>`;
     adminOrders.appendChild(card);
+    renderAdminDetail(null);
     return;
   }
 
@@ -283,10 +299,12 @@ const renderAdminOrders = (orders = [], message) => {
     card.className = "account-order";
     card.innerHTML = "<strong>Aucune commande active pour le moment</strong>";
     adminOrders.appendChild(card);
+    renderAdminDetail(null);
     return;
   }
 
   orders.forEach((order) => {
+    const unreadCount = getUnreadCount(order, "admin");
     const card = document.createElement("article");
     card.className = "account-order admin-order";
     card.innerHTML = `
@@ -301,6 +319,10 @@ const renderAdminOrders = (orders = [], message) => {
         <span>${formatPrice(Number(order.total_price || 0))}</span>
       </div>
       <div class="tracking-steps">${renderTrackingMarkup(order.status)}</div>
+      <div class="message-meta-row">
+        ${renderUnreadBadge(unreadCount)}
+        ${order.last_message_preview ? `<span class="message-preview">${order.last_message_preview}</span>` : ""}
+      </div>
       <div class="admin-order-controls">
         <select data-admin-status="${order.id}">
           <option value="paid"${order.status === "paid" ? " selected" : ""}>Payee</option>
@@ -350,6 +372,64 @@ const renderAdminStats = (orders = []) => {
   `;
 };
 
+const renderAdminDetail = (order) => {
+  if (!adminDetail || !adminDetailEmpty) {
+    return;
+  }
+
+  if (!order) {
+    adminDetail.hidden = true;
+    adminDetail.innerHTML = "";
+    adminDetailEmpty.hidden = false;
+    return;
+  }
+
+  adminDetailEmpty.hidden = true;
+  adminDetail.hidden = false;
+  adminDetail.innerHTML = `
+    <div class="admin-detail-item">
+      <span>Produit</span>
+      <strong>${order.product_title}</strong>
+    </div>
+    <div class="admin-detail-item">
+      <span>Commande</span>
+      <strong>#${String(order.id || "").slice(0, 8)}</strong>
+    </div>
+    <div class="admin-detail-item">
+      <span>Client</span>
+      <strong>${order.user_email || "Client inconnu"}</strong>
+    </div>
+    <div class="admin-detail-item">
+      <span>Categorie</span>
+      <strong>${order.product_category || "-"}</strong>
+    </div>
+    <div class="admin-detail-item">
+      <span>Quantite</span>
+      <strong>${order.quantity}</strong>
+    </div>
+    <div class="admin-detail-item">
+      <span>Paiement</span>
+      <strong>${getPaymentMethodLabel(order.payment_method)}</strong>
+    </div>
+    <div class="admin-detail-item">
+      <span>Total</span>
+      <strong>${formatPrice(Number(order.total_price || 0))}</strong>
+    </div>
+    <div class="admin-detail-item">
+      <span>Statut</span>
+      <strong>${getOrderStatusLabel(order.status)}</strong>
+    </div>
+    <div class="admin-detail-item">
+      <span>Dernier message</span>
+      <strong>${order.last_message_preview || "Aucun message"}</strong>
+    </div>
+    <div class="admin-detail-item">
+      <span>Date</span>
+      <strong>${formatOrderDate(order.created_at)}</strong>
+    </div>
+  `;
+};
+
 const applyAdminFilters = () => {
   if (!adminOrders) {
     return;
@@ -377,6 +457,14 @@ const applyAdminFilters = () => {
 
   renderAdminOrders(filteredOrders);
   bindConversationButtons("admin");
+
+  if (activeConversationOrderId) {
+    const activeOrder =
+      filteredOrders.find((order) => order.id === activeConversationOrderId) ||
+      currentAdminOrders.find((order) => order.id === activeConversationOrderId) ||
+      null;
+    renderAdminDetail(activeOrder);
+  }
 };
 
 const loadAccountOrders = async (user) => {
@@ -387,7 +475,7 @@ const loadAccountOrders = async (user) => {
   const { data, error } = await supabaseClient
     .from("orders")
     .select(
-      "id, product_title, quantity, total_price, payment_method, status, created_at"
+      "id, product_title, quantity, total_price, payment_method, status, created_at, unread_for_buyer, last_message_preview"
     )
     .order("created_at", { ascending: false });
 
@@ -403,6 +491,18 @@ const loadAccountOrders = async (user) => {
 
   renderOrders(data || []);
   bindConversationButtons("buyer");
+
+  if (activeConversationMode === "buyer" && activeConversationOrderId) {
+    const activeOrder = (data || []).find((order) => order.id === activeConversationOrderId);
+    activeConversationUnread = getUnreadCount(activeOrder, "buyer");
+    if (markReadButton) {
+      markReadButton.disabled = activeConversationUnread <= 0;
+      markReadButton.textContent =
+        activeConversationUnread > 0
+          ? `Marquer comme lu (${activeConversationUnread})`
+          : "Messages deja lus";
+    }
+  }
 };
 
 const loadAdminOrders = async () => {
@@ -432,6 +532,21 @@ const loadAdminOrders = async () => {
   renderAdminOrders(result.orders || []);
   renderAdminStats(result.orders || []);
   bindConversationButtons("admin");
+
+  if (activeConversationOrderId) {
+    const activeOrder = (result.orders || []).find(
+      (order) => order.id === activeConversationOrderId
+    );
+    renderAdminDetail(activeOrder || null);
+    activeConversationUnread = getUnreadCount(activeOrder, "admin");
+    if (markReadButton) {
+      markReadButton.disabled = activeConversationUnread <= 0;
+      markReadButton.textContent =
+        activeConversationUnread > 0
+          ? `Marquer comme lu (${activeConversationUnread})`
+          : "Messages deja lus";
+    }
+  }
 
   adminOrders.querySelectorAll("[data-admin-update]").forEach((button) => {
     button.addEventListener("click", async () => {
@@ -511,9 +626,27 @@ const loadConversation = async (orderId, mode) => {
 
   activeConversationOrderId = orderId;
   activeConversationMode = mode;
+  const sourceOrders = mode === "admin" ? currentAdminOrders : currentAccountOrders;
+  const activeOrder = sourceOrders.find((order) => order.id === orderId) || null;
+  activeConversationUnread = getUnreadCount(activeOrder, mode);
+
+  if (mode === "admin") {
+    renderAdminDetail(activeOrder);
+  }
 
   if (conversationEmpty) {
     conversationEmpty.textContent = `Discussion ouverte pour la commande #${String(orderId).slice(0, 8)}.`;
+  }
+
+  if (conversationActions) {
+    conversationActions.hidden = false;
+  }
+  if (markReadButton) {
+    markReadButton.disabled = activeConversationUnread <= 0;
+    markReadButton.textContent =
+      activeConversationUnread > 0
+        ? `Marquer comme lu (${activeConversationUnread})`
+        : "Messages deja lus";
   }
 
   conversationThread.hidden = false;
@@ -549,6 +682,41 @@ const loadConversation = async (orderId, mode) => {
   }
 
   renderConversation(result.messages || []);
+};
+
+const markConversationAsRead = async () => {
+  if (!supabaseClient || !activeConversationOrderId || !activeConversationMode) {
+    return;
+  }
+
+  const {
+    data: { session },
+  } = await supabaseClient.auth.getSession();
+
+  const response = await fetch("/api/messages/mark-read", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${session?.access_token || ""}`,
+    },
+    body: JSON.stringify({ orderId: activeConversationOrderId }),
+  });
+
+  if (!response.ok) {
+    return;
+  }
+
+  activeConversationUnread = 0;
+  if (markReadButton) {
+    markReadButton.disabled = true;
+    markReadButton.textContent = "Messages deja lus";
+  }
+
+  if (activeConversationMode === "admin") {
+    await loadAdminOrders();
+  } else {
+    await loadAccountOrders(session?.user);
+  }
 };
 
 const bindConversationButtons = (mode) => {
@@ -612,8 +780,28 @@ const bindConversationForm = () => {
 
     conversationForm.reset();
     await loadConversation(activeConversationOrderId, activeConversationMode);
+    if (activeConversationMode === "admin") {
+      await loadAdminOrders();
+    } else {
+      const {
+        data: { session },
+      } = await supabaseClient.auth.getSession();
+      await loadAccountOrders(session?.user);
+    }
   });
 };
+
+if (markReadButton) {
+  markReadButton.addEventListener("click", async () => {
+    if (!activeConversationOrderId || activeConversationUnread <= 0) {
+      return;
+    }
+
+    markReadButton.disabled = true;
+    await markConversationAsRead();
+    markReadButton.disabled = false;
+  });
+}
 
 if (adminSearch) {
   adminSearch.addEventListener("input", applyAdminFilters);
@@ -701,7 +889,7 @@ const getProductPayload = (card) => {
 
 const buildProductUrl = (payload) => {
   const params = new URLSearchParams(payload);
-  params.set("v", "t3ch-18");
+  params.set("v", "t3ch-19");
   return `product.html?${params.toString()}`;
 };
 
@@ -789,7 +977,7 @@ if (categoryTitle && productCards.length) {
       const nextParams = new URLSearchParams(window.location.search);
       nextParams.set("category", selectedCategory);
       nextParams.set("sort", productSort.value);
-      nextParams.set("v", "t3ch-18");
+      nextParams.set("v", "t3ch-19");
       window.history.replaceState(null, "", `?${nextParams.toString()}`);
       sortProducts(productSort.value);
       updateVisibleProducts();
@@ -888,7 +1076,7 @@ if (checkoutTitle && qtyInput) {
   if (checkoutBack) {
     checkoutBack.setAttribute(
       "href",
-      `category.html?category=${encodeURIComponent(category)}&v=t3ch-18`
+      `category.html?category=${encodeURIComponent(category)}&v=t3ch-19`
     );
   }
 

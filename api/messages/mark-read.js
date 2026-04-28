@@ -1,7 +1,6 @@
 import {
   getOrderById,
   getUserFromAccessToken,
-  insertMessage,
   updateOrder,
 } from "../_lib/supabase-admin.js";
 import { readJsonBody, sendJson } from "../_lib/response.js";
@@ -21,9 +20,9 @@ export default async function handler(request, response) {
       return sendJson(response, 401, { error: "Missing access token." });
     }
 
-    const { orderId, message } = await readJsonBody(request);
-    if (!orderId || !String(message || "").trim()) {
-      return sendJson(response, 400, { error: "Missing message payload." });
+    const { orderId } = await readJsonBody(request);
+    if (!orderId) {
+      return sendJson(response, 400, { error: "Missing order id." });
     }
 
     const user = await getUserFromAccessToken(accessToken);
@@ -43,26 +42,12 @@ export default async function handler(request, response) {
       return sendJson(response, 403, { error: "Access denied." });
     }
 
-    await insertMessage({
-      order_id: orderId,
-      user_id: user.id,
-      user_email: user.email || "",
-      author_role: isAdmin ? "admin" : "buyer",
-      message: String(message).trim(),
-    });
-
-    await updateOrder(orderId, {
-      last_message_at: new Date().toISOString(),
-      last_message_preview: String(message).trim().slice(0, 180),
-      last_message_author_role: isAdmin ? "admin" : "buyer",
-      unread_for_admin: isAdmin ? 0 : Number(order.unread_for_admin || 0) + 1,
-      unread_for_buyer: isAdmin ? Number(order.unread_for_buyer || 0) + 1 : 0,
-    });
+    await updateOrder(orderId, isAdmin ? { unread_for_admin: 0 } : { unread_for_buyer: 0 });
 
     return sendJson(response, 200, { ok: true });
   } catch (error) {
     return sendJson(response, 500, {
-      error: error.message || "Impossible d'envoyer le message.",
+      error: error.message || "Impossible de marquer les messages comme lus.",
     });
   }
 }

@@ -1868,6 +1868,10 @@ h3 {
   .admin-tools {
     grid-template-columns: 1fr;
   }
+
+  .admin-detail-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 720px) {
@@ -1919,6 +1923,12 @@ h3 {
   display: grid;
   grid-template-columns: minmax(0, 0.9fr) minmax(320px, 1.1fr);
   gap: 24px;
+}
+
+.admin-sidepanel {
+  display: grid;
+  gap: 24px;
+  align-content: start;
 }
 
 .account-order-head {
@@ -2007,6 +2017,31 @@ h3 {
   gap: 14px;
 }
 
+.admin-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.admin-detail-item {
+  display: grid;
+  gap: 8px;
+  padding: 14px 16px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.admin-detail-item span {
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.admin-detail-item strong {
+  color: #fff;
+}
+
 .admin-order-controls {
   display: flex;
   flex-wrap: wrap;
@@ -2026,6 +2061,31 @@ h3 {
 .conversation-card {
   display: grid;
   gap: 18px;
+}
+
+.message-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.message-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: rgba(255, 123, 97, 0.14);
+  border: 1px solid rgba(255, 123, 97, 0.26);
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.message-preview {
+  color: var(--muted);
+  font-size: 0.88rem;
 }
 
 .conversation-thread {

@@ -83,6 +83,36 @@ export const listMessagesByOrder = async (orderId) => {
   return response.json();
 };
 
+export const getMessagesCountSince = async (orderId, authorRole, since) => {
+  const { url } = getSupabaseConfig();
+  const query = new URLSearchParams({
+    order_id: `eq.${orderId}`,
+    author_role: `eq.${authorRole}`,
+    select: "id",
+  });
+
+  if (since) {
+    query.set("created_at", `gt.${since}`);
+  }
+
+  const response = await fetch(`${url}/rest/v1/order_messages?${query.toString()}`, {
+    headers: {
+      ...buildHeaders(),
+      Prefer: "count=exact",
+      Range: "0-0",
+    },
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(`Supabase message count failed: ${text}`);
+  }
+
+  const contentRange = response.headers.get("content-range") || "";
+  const total = Number(contentRange.split("/")[1] || "0");
+  return Number.isFinite(total) ? total : 0;
+};
+
 export const insertMessage = async (payload) => {
   const { url } = getSupabaseConfig();
   const response = await fetch(`${url}/rest/v1/order_messages`, {
