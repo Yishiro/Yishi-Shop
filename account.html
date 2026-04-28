@@ -14,7 +14,7 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="styles.css?v=t3ch-16" />
+    <link rel="stylesheet" href="styles.css?v=t3ch-17" />
   </head>
   <body>
     <header class="site-header" data-header>
@@ -32,7 +32,7 @@
       </button>
 
       <nav class="site-nav" id="site-nav">
-        <a href="category.html?category=skins&v=t3ch-16">Offres</a>
+        <a href="category.html?category=skins&v=t3ch-17">Offres</a>
         <a href="account.html">Mon compte</a>
         <a href="cgv.html">CGV</a>
         <a class="nav-cta" href="product.html">Commander</a>
@@ -73,11 +73,29 @@
         </article>
 
         <article class="account-card">
-          <h2>Dernieres commandes</h2>
+          <h2>Suivi de tes commandes</h2>
           <div class="account-order-list" data-account-orders>
             <article class="account-order">
               <strong>Chargement des commandes...</strong>
               <span>Ton historique sera affiche ici.</span>
+            </article>
+          </div>
+        </article>
+      </section>
+
+      <section class="section admin-section" data-admin-panel hidden>
+        <article class="account-card admin-card">
+          <div class="section-heading">
+            <p class="eyebrow">Admin</p>
+            <h2>Gestion des commandes</h2>
+            <p>
+              Consulte toutes les commandes, vois l'avancement et mets a jour le
+              statut quand la commande est prise en charge.
+            </p>
+          </div>
+          <div class="admin-order-list" data-admin-orders>
+            <article class="account-order">
+              <strong>Chargement des commandes admin...</strong>
             </article>
           </div>
         </article>
@@ -95,7 +113,8 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase-config.js"></script>
-    <script src="script.js?v=t3ch-16"></script>
+    <script src="script.js?v=t3ch-17"></script>
   </body>
 </html>
+
 

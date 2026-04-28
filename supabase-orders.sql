@@ -1,6 +1,7 @@
 create table if not exists public.orders (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users (id) on delete cascade,
+  user_email text,
   product_title text not null,
   product_category text not null,
   product_image text,
@@ -16,6 +17,7 @@ create table if not exists public.orders (
 
 alter table public.orders add column if not exists provider_order_id text;
 alter table public.orders add column if not exists provider_session_id text;
+alter table public.orders add column if not exists user_email text;
 
 alter table public.orders enable row level security;
 

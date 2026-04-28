@@ -1904,3 +1904,60 @@ h3 {
     min-height: 300px;
   }
 }
+
+.admin-section {
+  padding-top: 0;
+}
+
+.account-order-head {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.tracking-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tracking-step {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.tracking-step.is-done {
+  border-color: rgba(77, 214, 209, 0.28);
+  background: rgba(77, 214, 209, 0.14);
+  color: #fff;
+}
+
+.admin-order-list {
+  display: grid;
+  gap: 14px;
+}
+
+.admin-order-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.admin-order-controls select {
+  min-height: 44px;
+  padding: 0 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  color: #fff;
+}

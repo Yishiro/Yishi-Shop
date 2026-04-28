@@ -46,8 +46,11 @@ const accountDisplay = document.querySelector("[data-account-display]");
 const accountMail = document.querySelector("[data-account-mail]");
 const accountStatus = document.querySelector("[data-account-status]");
 const accountOrders = document.querySelector("[data-account-orders]");
+const adminPanel = document.querySelector("[data-admin-panel]");
+const adminOrders = document.querySelector("[data-admin-orders]");
 const logoutButton = document.querySelector("[data-logout]");
 const sortModes = ["price-asc", "price-desc", "name-asc", "name-desc"];
+const adminEmail = "yishiroof@gmail.com";
 const supabaseConfig = window.YISHI_SUPABASE_CONFIG || null;
 const currentPath = window.location.pathname;
 const isAuthPage =
@@ -124,6 +127,18 @@ const isOrdersTableMissing = (error) =>
 const getPaymentMethodLabel = (method) =>
   method === "paypal" ? "PayPal" : "Carte bancaire";
 
+const isAdminUser = (user) =>
+  String(user?.email || "").trim().toLowerCase() === adminEmail;
+
+const isPendingOrderExpired = (order) => {
+  if (order?.status !== "pending_payment" || !order?.created_at) {
+    return false;
+  }
+
+  const createdAt = new Date(order.created_at).getTime();
+  return Number.isFinite(createdAt) && Date.now() - createdAt > 10 * 60 * 1000;
+};
+
 const getOrderStatusLabel = (status) => {
   if (status === "paid") {
     return "Payee";
@@ -133,8 +148,51 @@ const getOrderStatusLabel = (status) => {
     return "Livree";
   }
 
+  if (status === "processing") {
+    return "En preparation";
+  }
+
+  if (status === "cancelled") {
+    return "Annulee";
+  }
+
   return "En attente de paiement";
 };
+
+const getOrderTrackingSteps = (status) => {
+  const steps = [
+    { key: "created", label: "Commande creee", done: true },
+    {
+      key: "paid",
+      label: "Paiement valide",
+      done: ["paid", "processing", "delivered"].includes(status),
+    },
+    {
+      key: "processing",
+      label: "En preparation",
+      done: ["processing", "delivered"].includes(status),
+    },
+    {
+      key: "delivered",
+      label: "Livree",
+      done: status === "delivered",
+    },
+  ];
+
+  if (status === "cancelled") {
+    return [{ key: "cancelled", label: "Commande annulee", done: true }];
+  }
+
+  return steps;
+};
+
+const renderTrackingMarkup = (status) =>
+  getOrderTrackingSteps(status)
+    .map(
+      (step) =>
+        `<span class="tracking-step${step.done ? " is-done" : ""}">${step.label}</span>`
+    )
+    .join("");
 
 const renderOrders = (orders = [], message) => {
   if (!accountOrders) {
@@ -160,20 +218,79 @@ const renderOrders = (orders = [], message) => {
     return;
   }
 
-  orders.forEach((order) => {
+  orders
+    .filter((order) => !isPendingOrderExpired(order))
+    .forEach((order) => {
     const card = document.createElement("article");
     card.className = "account-order";
     card.innerHTML = `
-      <strong>${order.product_title}</strong>
+      <div class="account-order-head">
+        <strong>${order.product_title}</strong>
+        <span class="product-tag">${getOrderStatusLabel(order.status)}</span>
+      </div>
       <div class="account-order-meta">
+        <span>#${String(order.id || "").slice(0, 8)}</span>
         <span>Quantite ${order.quantity}</span>
         <span>${formatPrice(Number(order.total_price || 0))}</span>
         <span>${getPaymentMethodLabel(order.payment_method)}</span>
       </div>
-      <span>${getOrderStatusLabel(order.status)}</span>
+      <div class="tracking-steps">${renderTrackingMarkup(order.status)}</div>
       <span>${formatOrderDate(order.created_at)}</span>
     `;
     accountOrders.appendChild(card);
+  });
+};
+
+const renderAdminOrders = (orders = [], message) => {
+  if (!adminOrders) {
+    return;
+  }
+
+  adminOrders.innerHTML = "";
+
+  if (message) {
+    const card = document.createElement("article");
+    card.className = "account-order";
+    card.innerHTML = `<strong>${message}</strong>`;
+    adminOrders.appendChild(card);
+    return;
+  }
+
+  if (!orders.length) {
+    const card = document.createElement("article");
+    card.className = "account-order";
+    card.innerHTML = "<strong>Aucune commande active pour le moment</strong>";
+    adminOrders.appendChild(card);
+    return;
+  }
+
+  orders.forEach((order) => {
+    const card = document.createElement("article");
+    card.className = "account-order admin-order";
+    card.innerHTML = `
+      <div class="account-order-head">
+        <strong>${order.product_title}</strong>
+        <span class="product-tag">${getOrderStatusLabel(order.status)}</span>
+      </div>
+      <div class="account-order-meta">
+        <span>#${String(order.id || "").slice(0, 8)}</span>
+        <span>${order.user_email || "Client inconnu"}</span>
+        <span>Quantite ${order.quantity}</span>
+        <span>${formatPrice(Number(order.total_price || 0))}</span>
+      </div>
+      <div class="tracking-steps">${renderTrackingMarkup(order.status)}</div>
+      <div class="admin-order-controls">
+        <select data-admin-status="${order.id}">
+          <option value="paid"${order.status === "paid" ? " selected" : ""}>Payee</option>
+          <option value="processing"${order.status === "processing" ? " selected" : ""}>En preparation</option>
+          <option value="delivered"${order.status === "delivered" ? " selected" : ""}>Livree</option>
+          <option value="cancelled"${order.status === "cancelled" ? " selected" : ""}>Annulee</option>
+        </select>
+        <button type="button" class="button button-secondary" data-admin-update="${order.id}">Mettre a jour</button>
+      </div>
+      <span>${formatOrderDate(order.created_at)}</span>
+    `;
+    adminOrders.appendChild(card);
   });
 };
 
@@ -200,6 +317,73 @@ const loadAccountOrders = async (user) => {
   }
 
   renderOrders(data || []);
+};
+
+const loadAdminOrders = async () => {
+  if (!supabaseClient || !adminOrders) {
+    return;
+  }
+
+  const {
+    data: { session },
+  } = await supabaseClient.auth.getSession();
+
+  const response = await fetch("/api/orders/list", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${session?.access_token || ""}`,
+    },
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    renderAdminOrders([], result.error || "Impossible de charger les commandes admin.");
+    return;
+  }
+
+  renderAdminOrders(result.orders || []);
+
+  adminOrders.querySelectorAll("[data-admin-update]").forEach((button) => {
+    button.addEventListener("click", async () => {
+      const orderId = button.dataset.adminUpdate;
+      const select = adminOrders.querySelector(`[data-admin-status="${orderId}"]`);
+      const nextStatus = select?.value;
+
+      if (!orderId || !nextStatus) {
+        return;
+      }
+
+      button.disabled = true;
+      button.textContent = "Maj...";
+
+      const updateResponse = await fetch("/api/orders/update-status", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session?.access_token || ""}`,
+        },
+        body: JSON.stringify({
+          orderId,
+          status: nextStatus,
+        }),
+      });
+
+      const updateResult = await updateResponse.json();
+
+      if (!updateResponse.ok) {
+        button.disabled = false;
+        button.textContent = "Reessayer";
+        return;
+      }
+
+      await loadAdminOrders();
+      if (accountName) {
+        loadAccountOrders({ id: session?.user?.id });
+      }
+    });
+  });
 };
 
 if (year) {
@@ -280,7 +464,7 @@ const getProductPayload = (card) => {
 
 const buildProductUrl = (payload) => {
   const params = new URLSearchParams(payload);
-  params.set("v", "t3ch-16");
+  params.set("v", "t3ch-17");
   return `product.html?${params.toString()}`;
 };
 
@@ -368,7 +552,7 @@ if (categoryTitle && productCards.length) {
       const nextParams = new URLSearchParams(window.location.search);
       nextParams.set("category", selectedCategory);
       nextParams.set("sort", productSort.value);
-      nextParams.set("v", "t3ch-16");
+      nextParams.set("v", "t3ch-17");
       window.history.replaceState(null, "", `?${nextParams.toString()}`);
       sortProducts(productSort.value);
       updateVisibleProducts();
@@ -467,7 +651,7 @@ if (checkoutTitle && qtyInput) {
   if (checkoutBack) {
     checkoutBack.setAttribute(
       "href",
-      `category.html?category=${encodeURIComponent(category)}&v=t3ch-16`
+      `category.html?category=${encodeURIComponent(category)}&v=t3ch-17`
     );
   }
 
@@ -513,7 +697,7 @@ if (checkoutTitle && qtyInput) {
     checkoutFeedback.style.color = isError ? "#c2410c" : "";
   };
 
-  const createPendingOrder = async (userId) => {
+  const createPendingOrder = async (userId, userEmail) => {
     const quantity = Math.min(99, Math.max(1, Number(qtyInput.value) || 1));
     const total = Number((price * quantity).toFixed(2));
 
@@ -521,6 +705,7 @@ if (checkoutTitle && qtyInput) {
       .from("orders")
       .insert({
         user_id: userId,
+        user_email: userEmail,
         product_title: title,
         product_category: category,
         product_image: image,
@@ -644,7 +829,8 @@ if (checkoutTitle && qtyInput) {
       paymentSubmitButton.textContent = "Preparation...";
 
       const { data: order, error: orderError } = await createPendingOrder(
-        session.user.id
+        session.user.id,
+        session.user.email || ""
       );
 
       if (orderError) {
@@ -784,6 +970,7 @@ const applyAccountView = (user) => {
 
   if (user) {
     const displayName = getUserDisplayName(user);
+    const isAdmin = isAdminUser(user);
     accountName.textContent = `Bonjour ${displayName}`;
 
     if (accountEmail) {
@@ -799,7 +986,7 @@ const applyAccountView = (user) => {
     }
 
     if (accountStatus) {
-      accountStatus.textContent = "Connecte";
+      accountStatus.textContent = isAdmin ? "Admin" : "Connecte";
     }
 
     if (logoutButton && !logoutButton.dataset.bound) {
@@ -815,6 +1002,12 @@ const applyAccountView = (user) => {
     }
 
     loadAccountOrders(user);
+    if (adminPanel) {
+      adminPanel.hidden = !isAdmin;
+    }
+    if (isAdmin) {
+      loadAdminOrders();
+    }
 
     return;
   }
@@ -842,6 +1035,9 @@ const applyAccountView = (user) => {
   }
 
   renderOrders([]);
+  if (adminPanel) {
+    adminPanel.hidden = true;
+  }
 };
 
 const handleSupabaseAuth = async () => {
@@ -947,4 +1143,5 @@ const handleSupabaseAuth = async () => {
 };
 
 handleSupabaseAuth();
+
 
