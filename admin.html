@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="Espace client Yishi's Shop."
+      content="Administration des commandes Yishi's Shop."
     />
-    <title>Mon compte | Yishi's Shop</title>
+    <title>Admin | Yishi's Shop</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -34,63 +34,77 @@
       <nav class="site-nav" id="site-nav">
         <a href="category.html?category=skins&v=t3ch-18">Offres</a>
         <a href="account.html">Mon compte</a>
+        <a href="admin.html">Admin</a>
         <a href="cgv.html">CGV</a>
-        <a class="nav-cta" href="product.html">Commander</a>
       </nav>
     </header>
 
     <main class="account-page">
       <section class="section account-hero">
         <div class="section-heading">
-          <p class="eyebrow">Espace client</p>
-          <h1 data-account-name>Mon compte</h1>
-          <p data-account-email>
-            Retrouve ici tes informations, tes commandes et les prochaines etapes.
+          <p class="eyebrow">Admin</p>
+          <h1>Gestion des commandes</h1>
+          <p>
+            Consulte toutes les commandes, mets a jour les statuts et echange
+            directement avec les acheteurs.
           </p>
         </div>
       </section>
 
-      <section class="section account-layout">
-        <article class="account-card">
-          <h2>Profil</h2>
-          <dl class="account-list">
-            <div>
-              <dt>Pseudo</dt>
-              <dd data-account-display>Invite</dd>
-            </div>
-            <div>
-              <dt>Email</dt>
-              <dd data-account-mail>Non connecte</dd>
-            </div>
-            <div>
-              <dt>Statut</dt>
-              <dd data-account-status>Connexion requise</dd>
-            </div>
-          </dl>
-          <div class="account-actions">
-            <a class="button button-secondary" href="admin.html" data-admin-entry hidden>Ouvrir l'admin</a>
-            <button type="button" class="button button-primary" data-logout hidden>Se deconnecter</button>
+      <section class="section admin-dashboard">
+        <article class="account-card admin-card">
+          <div class="section-heading">
+            <p class="eyebrow">Pilotage</p>
+            <h2>Vue complete</h2>
           </div>
-        </article>
-
-        <article class="account-card">
-          <h2>Suivi de tes commandes</h2>
-          <div class="account-order-list" data-account-orders>
+          <div class="admin-stats" data-admin-stats>
+            <article class="admin-stat-card">
+              <span>Total commandes</span>
+              <strong>0</strong>
+            </article>
+            <article class="admin-stat-card">
+              <span>Payees</span>
+              <strong>0</strong>
+            </article>
+            <article class="admin-stat-card">
+              <span>En preparation</span>
+              <strong>0</strong>
+            </article>
+            <article class="admin-stat-card">
+              <span>Livrees</span>
+              <strong>0</strong>
+            </article>
+          </div>
+          <div class="admin-tools">
+            <input
+              type="search"
+              class="field-input"
+              data-admin-search
+              placeholder="Rechercher par client, produit ou numero..."
+            />
+            <select class="field-input" data-admin-filter>
+              <option value="all">Tous les statuts</option>
+              <option value="pending_payment">En attente de paiement</option>
+              <option value="paid">Payees</option>
+              <option value="processing">En preparation</option>
+              <option value="delivered">Livrees</option>
+              <option value="cancelled">Annulees</option>
+            </select>
+          </div>
+          <h2>Toutes les commandes</h2>
+          <div class="admin-order-list" data-admin-orders>
             <article class="account-order">
               <strong>Chargement des commandes...</strong>
-              <span>Ton historique sera affiche ici.</span>
             </article>
           </div>
         </article>
-      </section>
 
-      <section class="section">
         <article class="account-card conversation-card">
           <div class="section-heading">
             <p class="eyebrow">Messages</p>
-            <h2>Discussion avec le shop</h2>
+            <h2>Discussion commande</h2>
             <p data-conversation-empty>
-              Selectionne une commande pour ouvrir la discussion avec l'admin.
+              Selectionne une commande pour voir l'echange avec le client.
             </p>
           </div>
           <div class="conversation-thread" data-conversation-thread hidden></div>
@@ -99,7 +113,7 @@
               name="message"
               rows="4"
               maxlength="1000"
-              placeholder="Ecris ton message..."
+              placeholder="Repondre au client..."
               required
             ></textarea>
             <div class="account-actions">
@@ -113,9 +127,9 @@
     <footer class="site-footer">
       <p>© <span data-year></span> Yishi's Shop. Tous droits reserves.</p>
       <div class="footer-links">
-        <a href="mentions-legales.html">Mentions légales</a>
+        <a href="mentions-legales.html">Mentions legales</a>
         <a href="cgv.html">CGV</a>
-        <a href="politique-confidentialite.html">Politique de confidentialité</a>
+        <a href="politique-confidentialite.html">Politique de confidentialite</a>
       </div>
     </footer>
 
@@ -124,6 +138,4 @@
     <script src="script.js?v=t3ch-18"></script>
   </body>
 </html>
-
-
 

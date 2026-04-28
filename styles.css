@@ -1849,6 +1849,7 @@ h3 {
   .hero,
   .auth-layout,
   .account-layout,
+  .admin-dashboard,
   .checkout-layout {
     grid-template-columns: 1fr;
   }
@@ -1861,6 +1862,11 @@ h3 {
 
   .account-card:first-child {
     position: static;
+  }
+
+  .admin-stats,
+  .admin-tools {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -1909,6 +1915,12 @@ h3 {
   padding-top: 0;
 }
 
+.admin-dashboard {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(320px, 1.1fr);
+  gap: 24px;
+}
+
 .account-order-head {
   display: flex;
   align-items: start;
@@ -1941,6 +1953,55 @@ h3 {
   color: #fff;
 }
 
+.admin-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.admin-stat-card {
+  display: grid;
+  gap: 8px;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.admin-stat-card span {
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.admin-stat-card strong {
+  font-size: 1.7rem;
+  line-height: 1;
+}
+
+.admin-tools {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(220px, 0.7fr);
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.field-input {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  color: #fff;
+  font: inherit;
+}
+
+.field-input::placeholder {
+  color: rgba(154, 176, 183, 0.7);
+}
+
 .admin-order-list {
   display: grid;
   gap: 14px;
@@ -1960,4 +2021,67 @@ h3 {
   border: 1px solid rgba(255, 255, 255, 0.1);
   background: rgba(255, 255, 255, 0.04);
   color: #fff;
+}
+
+.conversation-card {
+  display: grid;
+  gap: 18px;
+}
+
+.conversation-thread {
+  display: grid;
+  gap: 12px;
+  max-height: 480px;
+  overflow: auto;
+  padding-right: 4px;
+}
+
+.message-bubble {
+  display: grid;
+  gap: 8px;
+  padding: 14px 16px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.message-bubble p {
+  margin: 0;
+  color: #fff;
+}
+
+.message-bubble span {
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.message-bubble.is-admin {
+  border-color: rgba(77, 214, 209, 0.22);
+  background: rgba(77, 214, 209, 0.1);
+}
+
+.message-bubble.is-buyer {
+  border-color: rgba(255, 123, 97, 0.22);
+  background: rgba(255, 123, 97, 0.08);
+}
+
+.conversation-form {
+  display: grid;
+  gap: 12px;
+}
+
+.conversation-form textarea {
+  width: 100%;
+  min-height: 140px;
+  padding: 14px 16px;
+  resize: vertical;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  color: #fff;
+  font: inherit;
+}
+
+.conversation-form textarea::placeholder {
+  color: rgba(154, 176, 183, 0.7);
 }

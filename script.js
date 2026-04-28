@@ -46,17 +46,30 @@ const accountDisplay = document.querySelector("[data-account-display]");
 const accountMail = document.querySelector("[data-account-mail]");
 const accountStatus = document.querySelector("[data-account-status]");
 const accountOrders = document.querySelector("[data-account-orders]");
-const adminPanel = document.querySelector("[data-admin-panel]");
 const adminOrders = document.querySelector("[data-admin-orders]");
+const adminEntries = document.querySelectorAll("[data-admin-entry]");
+const adminStats = document.querySelector("[data-admin-stats]");
+const adminSearch = document.querySelector("[data-admin-search]");
+const adminFilter = document.querySelector("[data-admin-filter]");
+const conversationThread = document.querySelector("[data-conversation-thread]");
+const conversationForm = document.querySelector("[data-conversation-form]");
+const conversationEmpty = document.querySelector("[data-conversation-empty]");
 const logoutButton = document.querySelector("[data-logout]");
 const sortModes = ["price-asc", "price-desc", "name-asc", "name-desc"];
 const adminEmail = "yishiroof@gmail.com";
+let activeConversationOrderId = "";
+let activeConversationMode = "";
+let currentAccountOrders = [];
+let currentAdminOrders = [];
 const supabaseConfig = window.YISHI_SUPABASE_CONFIG || null;
 const currentPath = window.location.pathname;
+const isAccountPage =
+  currentPath.endsWith("/account.html") || currentPath.endsWith("/admin.html");
 const isAuthPage =
   currentPath.endsWith("/login.html") ||
   currentPath.endsWith("/signup.html") ||
-  currentPath.endsWith("/account.html");
+  isAccountPage;
+const needsUserBootstrap = isAuthPage || adminEntries.length > 0;
 const supabaseClient =
   window.supabase &&
   supabaseConfig?.url &&
@@ -194,12 +207,19 @@ const renderTrackingMarkup = (status) =>
     )
     .join("");
 
+const updateAdminEntries = (isAdmin) => {
+  adminEntries.forEach((entry) => {
+    entry.hidden = !isAdmin;
+  });
+};
+
 const renderOrders = (orders = [], message) => {
   if (!accountOrders) {
     return;
   }
 
   accountOrders.innerHTML = "";
+  currentAccountOrders = orders.filter((order) => !isPendingOrderExpired(order));
 
   if (message) {
     const emptyCard = document.createElement("article");
@@ -218,9 +238,7 @@ const renderOrders = (orders = [], message) => {
     return;
   }
 
-  orders
-    .filter((order) => !isPendingOrderExpired(order))
-    .forEach((order) => {
+  currentAccountOrders.forEach((order) => {
     const card = document.createElement("article");
     card.className = "account-order";
     card.innerHTML = `
@@ -235,6 +253,9 @@ const renderOrders = (orders = [], message) => {
         <span>${getPaymentMethodLabel(order.payment_method)}</span>
       </div>
       <div class="tracking-steps">${renderTrackingMarkup(order.status)}</div>
+      <div class="account-actions">
+        <button type="button" class="button button-secondary" data-open-conversation="${order.id}">Voir la discussion</button>
+      </div>
       <span>${formatOrderDate(order.created_at)}</span>
     `;
     accountOrders.appendChild(card);
@@ -247,6 +268,7 @@ const renderAdminOrders = (orders = [], message) => {
   }
 
   adminOrders.innerHTML = "";
+  currentAdminOrders = orders;
 
   if (message) {
     const card = document.createElement("article");
@@ -287,11 +309,74 @@ const renderAdminOrders = (orders = [], message) => {
           <option value="cancelled"${order.status === "cancelled" ? " selected" : ""}>Annulee</option>
         </select>
         <button type="button" class="button button-secondary" data-admin-update="${order.id}">Mettre a jour</button>
+        <button type="button" class="button button-secondary" data-open-conversation="${order.id}">Messages</button>
       </div>
       <span>${formatOrderDate(order.created_at)}</span>
     `;
     adminOrders.appendChild(card);
   });
+};
+
+const renderAdminStats = (orders = []) => {
+  if (!adminStats) {
+    return;
+  }
+
+  const paidCount = orders.filter((order) => order.status === "paid").length;
+  const processingCount = orders.filter(
+    (order) => order.status === "processing"
+  ).length;
+  const deliveredCount = orders.filter(
+    (order) => order.status === "delivered"
+  ).length;
+
+  adminStats.innerHTML = `
+    <article class="admin-stat-card">
+      <span>Total commandes</span>
+      <strong>${orders.length}</strong>
+    </article>
+    <article class="admin-stat-card">
+      <span>Payees</span>
+      <strong>${paidCount}</strong>
+    </article>
+    <article class="admin-stat-card">
+      <span>En preparation</span>
+      <strong>${processingCount}</strong>
+    </article>
+    <article class="admin-stat-card">
+      <span>Livrees</span>
+      <strong>${deliveredCount}</strong>
+    </article>
+  `;
+};
+
+const applyAdminFilters = () => {
+  if (!adminOrders) {
+    return;
+  }
+
+  const searchValue = String(adminSearch?.value || "")
+    .trim()
+    .toLowerCase();
+  const filterValue = String(adminFilter?.value || "all");
+
+  const filteredOrders = currentAdminOrders.filter((order) => {
+    const matchesStatus =
+      filterValue === "all" ? true : String(order.status) === filterValue;
+    const haystack = [
+      order.product_title,
+      order.user_email,
+      order.id,
+      getOrderStatusLabel(order.status),
+    ]
+      .join(" ")
+      .toLowerCase();
+
+    return matchesStatus && (!searchValue || haystack.includes(searchValue));
+  });
+
+  renderAdminOrders(filteredOrders);
+  bindConversationButtons("admin");
 };
 
 const loadAccountOrders = async (user) => {
@@ -317,6 +402,7 @@ const loadAccountOrders = async (user) => {
   }
 
   renderOrders(data || []);
+  bindConversationButtons("buyer");
 };
 
 const loadAdminOrders = async () => {
@@ -344,6 +430,8 @@ const loadAdminOrders = async () => {
   }
 
   renderAdminOrders(result.orders || []);
+  renderAdminStats(result.orders || []);
+  bindConversationButtons("admin");
 
   adminOrders.querySelectorAll("[data-admin-update]").forEach((button) => {
     button.addEventListener("click", async () => {
@@ -385,6 +473,155 @@ const loadAdminOrders = async () => {
     });
   });
 };
+
+const renderConversation = (messages = []) => {
+  if (!conversationThread) {
+    return;
+  }
+
+  conversationThread.innerHTML = "";
+
+  if (!messages.length) {
+    const emptyMessage = document.createElement("article");
+    emptyMessage.className = "message-bubble";
+    emptyMessage.innerHTML =
+      "<strong>Aucun message pour le moment</strong><span>Commence la discussion depuis cette commande.</span>";
+    conversationThread.appendChild(emptyMessage);
+    return;
+  }
+
+  messages.forEach((message) => {
+    const item = document.createElement("article");
+    item.className = `message-bubble${message.author_role === "admin" ? " is-admin" : " is-buyer"}`;
+    item.innerHTML = `
+      <strong>${message.author_role === "admin" ? "Admin" : message.user_email || "Client"}</strong>
+      <p>${message.message}</p>
+      <span>${formatOrderDate(message.created_at)}</span>
+    `;
+    conversationThread.appendChild(item);
+  });
+
+  conversationThread.scrollTop = conversationThread.scrollHeight;
+};
+
+const loadConversation = async (orderId, mode) => {
+  if (!conversationThread || !conversationForm) {
+    return;
+  }
+
+  activeConversationOrderId = orderId;
+  activeConversationMode = mode;
+
+  if (conversationEmpty) {
+    conversationEmpty.textContent = `Discussion ouverte pour la commande #${String(orderId).slice(0, 8)}.`;
+  }
+
+  conversationThread.hidden = false;
+  conversationForm.hidden = false;
+  conversationThread.innerHTML =
+    '<article class="message-bubble"><strong>Chargement...</strong></article>';
+
+  const {
+    data: { session },
+  } = await supabaseClient.auth.getSession();
+
+  const response = await fetch("/api/messages/list", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${session?.access_token || ""}`,
+    },
+    body: JSON.stringify({ orderId }),
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    renderConversation([
+      {
+        author_role: "admin",
+        user_email: "",
+        message: result.error || "Impossible de charger les messages.",
+        created_at: new Date().toISOString(),
+      },
+    ]);
+    return;
+  }
+
+  renderConversation(result.messages || []);
+};
+
+const bindConversationButtons = (mode) => {
+  document.querySelectorAll("[data-open-conversation]").forEach((button) => {
+    if (button.dataset.bound === "true") {
+      return;
+    }
+
+    button.dataset.bound = "true";
+    button.addEventListener("click", () => {
+      const orderId = button.dataset.openConversation;
+      if (!orderId) {
+        return;
+      }
+
+      loadConversation(orderId, mode);
+    });
+  });
+};
+
+const bindConversationForm = () => {
+  if (!conversationForm) {
+    return;
+  }
+
+  conversationForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    if (!activeConversationOrderId) {
+      return;
+    }
+
+    const formData = new FormData(conversationForm);
+    const message = String(formData.get("message") || "").trim();
+
+    if (!message) {
+      return;
+    }
+
+    const {
+      data: { session },
+    } = await supabaseClient.auth.getSession();
+
+    const response = await fetch("/api/messages/send", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session?.access_token || ""}`,
+      },
+      body: JSON.stringify({
+        orderId: activeConversationOrderId,
+        message,
+      }),
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      return;
+    }
+
+    conversationForm.reset();
+    await loadConversation(activeConversationOrderId, activeConversationMode);
+  });
+};
+
+if (adminSearch) {
+  adminSearch.addEventListener("input", applyAdminFilters);
+}
+
+if (adminFilter) {
+  adminFilter.addEventListener("change", applyAdminFilters);
+}
 
 if (year) {
   year.textContent = new Date().getFullYear();
@@ -464,7 +701,7 @@ const getProductPayload = (card) => {
 
 const buildProductUrl = (payload) => {
   const params = new URLSearchParams(payload);
-  params.set("v", "t3ch-17");
+  params.set("v", "t3ch-18");
   return `product.html?${params.toString()}`;
 };
 
@@ -552,7 +789,7 @@ if (categoryTitle && productCards.length) {
       const nextParams = new URLSearchParams(window.location.search);
       nextParams.set("category", selectedCategory);
       nextParams.set("sort", productSort.value);
-      nextParams.set("v", "t3ch-17");
+      nextParams.set("v", "t3ch-18");
       window.history.replaceState(null, "", `?${nextParams.toString()}`);
       sortProducts(productSort.value);
       updateVisibleProducts();
@@ -651,7 +888,7 @@ if (checkoutTitle && qtyInput) {
   if (checkoutBack) {
     checkoutBack.setAttribute(
       "href",
-      `category.html?category=${encodeURIComponent(category)}&v=t3ch-17`
+      `category.html?category=${encodeURIComponent(category)}&v=t3ch-18`
     );
   }
 
@@ -947,6 +1184,7 @@ const handlePaymentReturn = async () => {
 };
 
 handlePaymentReturn();
+bindConversationForm();
 
 const setAuthFeedback = (form, message, isError = false) => {
   const feedback = form?.querySelector("[data-auth-feedback]");
@@ -988,6 +1226,7 @@ const applyAccountView = (user) => {
     if (accountStatus) {
       accountStatus.textContent = isAdmin ? "Admin" : "Connecte";
     }
+    updateAdminEntries(isAdmin);
 
     if (logoutButton && !logoutButton.dataset.bound) {
       logoutButton.hidden = false;
@@ -1002,9 +1241,6 @@ const applyAccountView = (user) => {
     }
 
     loadAccountOrders(user);
-    if (adminPanel) {
-      adminPanel.hidden = !isAdmin;
-    }
     if (isAdmin) {
       loadAdminOrders();
     }
@@ -1033,15 +1269,13 @@ const applyAccountView = (user) => {
       ? "Connexion requise"
       : "Configuration requise";
   }
+  updateAdminEntries(false);
 
   renderOrders([]);
-  if (adminPanel) {
-    adminPanel.hidden = true;
-  }
 };
 
 const handleSupabaseAuth = async () => {
-  if (!isAuthPage) {
+  if (!needsUserBootstrap) {
     return;
   }
 
@@ -1071,9 +1305,30 @@ const handleSupabaseAuth = async () => {
     }
 
     applyAccountView(currentUser);
+  } else if (currentPath.endsWith("/admin.html")) {
+    if (!currentUser) {
+      const returnTo = encodeURIComponent(window.location.href);
+      window.location.href = `login.html?returnTo=${returnTo}`;
+      return;
+    }
+
+    if (!isAdminUser(currentUser)) {
+      window.location.href = "account.html";
+      return;
+    }
+
+    if (accountName) {
+      accountName.textContent = "Admin";
+    }
+    loadAdminOrders();
   } else if (currentUser) {
-    window.location.href = getReturnToUrl();
-    return;
+    updateAdminEntries(isAdminUser(currentUser));
+    if (currentPath.endsWith("/login.html") || currentPath.endsWith("/signup.html")) {
+      window.location.href = getReturnToUrl();
+      return;
+    }
+  } else {
+    updateAdminEntries(false);
   }
 
   authForms.forEach((form) => {
@@ -1143,5 +1398,6 @@ const handleSupabaseAuth = async () => {
 };
 
 handleSupabaseAuth();
+
 
 

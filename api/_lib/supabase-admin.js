@@ -48,6 +48,60 @@ export const listOrders = async () => {
   return response.json();
 };
 
+export const getOrderById = async (orderId) => {
+  const { url } = getSupabaseConfig();
+  const response = await fetch(
+    `${url}/rest/v1/orders?id=eq.${encodeURIComponent(orderId)}&select=*`,
+    {
+      headers: buildHeaders(),
+    }
+  );
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(`Supabase order lookup failed: ${text}`);
+  }
+
+  const rows = await response.json();
+  return rows?.[0] || null;
+};
+
+export const listMessagesByOrder = async (orderId) => {
+  const { url } = getSupabaseConfig();
+  const response = await fetch(
+    `${url}/rest/v1/order_messages?order_id=eq.${encodeURIComponent(orderId)}&select=*&order=created_at.asc`,
+    {
+      headers: buildHeaders(),
+    }
+  );
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(`Supabase message list failed: ${text}`);
+  }
+
+  return response.json();
+};
+
+export const insertMessage = async (payload) => {
+  const { url } = getSupabaseConfig();
+  const response = await fetch(`${url}/rest/v1/order_messages`, {
+    method: "POST",
+    headers: {
+      ...buildHeaders(),
+      Prefer: "return=representation",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(`Supabase message insert failed: ${text}`);
+  }
+
+  return response.json();
+};
+
 export const deleteExpiredPendingOrders = async () => {
   const { url } = getSupabaseConfig();
   const cutoff = new Date(Date.now() - 10 * 60 * 1000).toISOString();
