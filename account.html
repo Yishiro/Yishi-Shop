@@ -14,7 +14,7 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="styles.css?v=t3ch-13" />
+    <link rel="stylesheet" href="styles.css?v=t3ch-14" />
   </head>
   <body>
     <header class="site-header" data-header>
@@ -32,7 +32,7 @@
       </button>
 
       <nav class="site-nav" id="site-nav">
-        <a href="category.html?category=skins&v=t3ch-13">Offres</a>
+        <a href="category.html?category=skins&v=t3ch-14">Offres</a>
         <a href="account.html">Mon compte</a>
         <a href="cgv.html">CGV</a>
         <a class="nav-cta" href="product.html">Commander</a>
@@ -64,7 +64,7 @@
             </div>
             <div>
               <dt>Statut</dt>
-              <dd data-account-status>Preparation</dd>
+              <dd data-account-status>Connexion requise</dd>
             </div>
           </dl>
           <div class="account-actions">
@@ -92,7 +92,7 @@
         <article class="account-card">
           <h2>Suite de l'integration</h2>
           <ul class="account-bullets">
-            <li>Connexion reelle avec backend securise</li>
+            <li>Compte client synchronise avec Supabase</li>
             <li>Historique de commandes relie aux paiements</li>
             <li>Suivi de statut apres achat</li>
           </ul>
@@ -109,6 +109,8 @@
       </div>
     </footer>
 
-    <script src="script.js?v=t3ch-13"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script src="script.js?v=t3ch-14"></script>
   </body>
 </html>

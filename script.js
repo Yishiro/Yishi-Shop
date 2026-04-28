@@ -42,7 +42,18 @@ const accountMail = document.querySelector("[data-account-mail]");
 const accountStatus = document.querySelector("[data-account-status]");
 const logoutButton = document.querySelector("[data-logout]");
 const sortModes = ["price-asc", "price-desc", "name-asc", "name-desc"];
-const accountStorageKey = "yishi-shop-account";
+const supabaseConfig = window.YISHI_SUPABASE_CONFIG || null;
+const currentPath = window.location.pathname;
+const isAuthPage =
+  currentPath.endsWith("/login.html") ||
+  currentPath.endsWith("/signup.html") ||
+  currentPath.endsWith("/account.html");
+const supabaseClient =
+  window.supabase &&
+  supabaseConfig?.url &&
+  supabaseConfig?.anonKey
+    ? window.supabase.createClient(supabaseConfig.url, supabaseConfig.anonKey)
+    : null;
 
 const categories = {
   skins: {
@@ -89,23 +100,6 @@ const formatPrice = (value) =>
     minimumFractionDigits: value % 1 === 0 ? 0 : 2,
     maximumFractionDigits: 2,
   }).format(value);
-
-const readAccount = () => {
-  try {
-    const rawAccount = window.localStorage.getItem(accountStorageKey);
-    return rawAccount ? JSON.parse(rawAccount) : null;
-  } catch {
-    return null;
-  }
-};
-
-const saveAccount = (account) => {
-  window.localStorage.setItem(accountStorageKey, JSON.stringify(account));
-};
-
-const clearAccount = () => {
-  window.localStorage.removeItem(accountStorageKey);
-};
 
 if (year) {
   year.textContent = new Date().getFullYear();
@@ -185,7 +179,7 @@ const getProductPayload = (card) => {
 
 const buildProductUrl = (payload) => {
   const params = new URLSearchParams(payload);
-  params.set("v", "t3ch-13");
+  params.set("v", "t3ch-14");
   return `product.html?${params.toString()}`;
 };
 
@@ -273,7 +267,7 @@ if (categoryTitle && productCards.length) {
       const nextParams = new URLSearchParams(window.location.search);
       nextParams.set("category", selectedCategory);
       nextParams.set("sort", productSort.value);
-      nextParams.set("v", "t3ch-13");
+      nextParams.set("v", "t3ch-14");
       window.history.replaceState(null, "", `?${nextParams.toString()}`);
       sortProducts(productSort.value);
       updateVisibleProducts();
@@ -371,7 +365,7 @@ if (checkoutTitle && qtyInput) {
   if (checkoutBack) {
     checkoutBack.setAttribute(
       "href",
-      `category.html?category=${encodeURIComponent(category)}&v=t3ch-13`
+      `category.html?category=${encodeURIComponent(category)}&v=t3ch-14`
     );
   }
 
@@ -446,78 +440,181 @@ if (checkoutTitle && qtyInput) {
   updateCheckout();
 }
 
-if (authForms.length) {
+const setAuthFeedback = (form, message, isError = false) => {
+  const feedback = form?.querySelector("[data-auth-feedback]");
+  if (!feedback) {
+    return;
+  }
+
+  feedback.textContent = message;
+  feedback.style.color = isError ? "#c2410c" : "";
+};
+
+const getUserDisplayName = (user) =>
+  user?.user_metadata?.display_name ||
+  user?.email?.split("@")[0] ||
+  "Client";
+
+const applyAccountView = (user) => {
+  if (!accountName) {
+    return;
+  }
+
+  if (user) {
+    const displayName = getUserDisplayName(user);
+    accountName.textContent = `Bonjour ${displayName}`;
+
+    if (accountEmail) {
+      accountEmail.textContent = user.email || "";
+    }
+
+    if (accountDisplay) {
+      accountDisplay.textContent = displayName;
+    }
+
+    if (accountMail) {
+      accountMail.textContent = user.email || "";
+    }
+
+    if (accountStatus) {
+      accountStatus.textContent = "Connecte";
+    }
+
+    if (logoutButton && !logoutButton.dataset.bound) {
+      logoutButton.hidden = false;
+      logoutButton.dataset.bound = "true";
+      logoutButton.addEventListener("click", async () => {
+        if (supabaseClient) {
+          await supabaseClient.auth.signOut();
+        }
+
+        window.location.href = "login.html";
+      });
+    }
+
+    return;
+  }
+
+  accountName.textContent = "Mon compte";
+
+  if (accountEmail) {
+    accountEmail.textContent = supabaseClient
+      ? "Connecte-toi pour retrouver ton espace client."
+      : "Configuration Supabase manquante pour activer la connexion.";
+  }
+
+  if (accountDisplay) {
+    accountDisplay.textContent = "Invite";
+  }
+
+  if (accountMail) {
+    accountMail.textContent = "Non connecte";
+  }
+
+  if (accountStatus) {
+    accountStatus.textContent = supabaseClient
+      ? "Connexion requise"
+      : "Configuration requise";
+  }
+};
+
+const handleSupabaseAuth = async () => {
+  if (!isAuthPage) {
+    return;
+  }
+
+  if (!supabaseClient) {
+    authForms.forEach((form) => {
+      setAuthFeedback(
+        form,
+        "Ajoute ton URL Supabase et ta cle anon dans supabase-config.js pour activer la connexion.",
+        true
+      );
+    });
+
+    applyAccountView(null);
+    return;
+  }
+
+  const {
+    data: { session },
+  } = await supabaseClient.auth.getSession();
+  const currentUser = session?.user || null;
+
+  if (currentPath.endsWith("/account.html")) {
+    if (!currentUser) {
+      window.location.href = "login.html";
+      return;
+    }
+
+    applyAccountView(currentUser);
+  } else if (currentUser) {
+    window.location.href = "account.html";
+    return;
+  }
+
   authForms.forEach((form) => {
-    form.addEventListener("submit", (event) => {
+    form.addEventListener("submit", async (event) => {
       event.preventDefault();
 
       const formData = new FormData(form);
       const email = String(formData.get("email") || "").trim();
+      const password = String(formData.get("password") || "").trim();
       const displayName =
         String(formData.get("displayName") || "").trim() ||
         email.split("@")[0] ||
         "Client";
-      const feedback = form.querySelector("[data-auth-feedback]");
 
-      saveAccount({
-        email,
-        displayName,
-        status: "Connecte",
-      });
+      setAuthFeedback(form, "Verification en cours...");
 
-      if (feedback) {
-        feedback.textContent =
-          form.dataset.authForm === "signup"
-            ? "Compte cree. Redirection vers ton espace client..."
-            : "Connexion reussie. Redirection vers ton espace client...";
+      if (form.dataset.authForm === "signup") {
+        const { error } = await supabaseClient.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              display_name: displayName,
+            },
+          },
+        });
+
+        if (error) {
+          setAuthFeedback(form, error.message, true);
+          return;
+        }
+
+        setAuthFeedback(
+          form,
+          "Compte cree. Verifie aussi ton email si Supabase demande une confirmation, puis reconnecte-toi."
+        );
+        window.setTimeout(() => {
+          window.location.href = "login.html";
+        }, 1200);
+        return;
       }
 
+      const { error } = await supabaseClient.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        setAuthFeedback(form, error.message, true);
+        return;
+      }
+
+      setAuthFeedback(form, "Connexion reussie. Redirection vers ton espace client...");
       window.setTimeout(() => {
         window.location.href = "account.html";
       }, 500);
     });
   });
-}
 
-if (accountName) {
-  const account = readAccount();
+  supabaseClient.auth.onAuthStateChange((_event, nextSession) => {
+    if (currentPath.endsWith("/account.html")) {
+      applyAccountView(nextSession?.user || null);
+    }
+  });
+};
 
-  if (account) {
-    accountName.textContent = `Bonjour ${account.displayName}`;
-    if (accountEmail) {
-      accountEmail.textContent = account.email;
-    }
-    if (accountDisplay) {
-      accountDisplay.textContent = account.displayName;
-    }
-    if (accountMail) {
-      accountMail.textContent = account.email;
-    }
-    if (accountStatus) {
-      accountStatus.textContent = account.status || "Connecte";
-    }
-    if (logoutButton) {
-      logoutButton.hidden = false;
-      logoutButton.addEventListener("click", () => {
-        clearAccount();
-        window.location.href = "login.html";
-      });
-    }
-  } else {
-    if (accountName) {
-      accountName.textContent = "Mon compte";
-    }
-    if (accountEmail) {
-      accountEmail.textContent = "Connecte-toi pour retrouver ton espace client.";
-    }
-    if (accountDisplay) {
-      accountDisplay.textContent = "Invite";
-    }
-    if (accountMail) {
-      accountMail.textContent = "Non connecte";
-    }
-    if (accountStatus) {
-      accountStatus.textContent = "Connexion requise";
-    }
-  }
-}
+handleSupabaseAuth();
