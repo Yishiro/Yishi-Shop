@@ -793,6 +793,241 @@ h3 {
   padding-left: 20px;
 }
 
+.checkout-page {
+  padding-bottom: 42px;
+}
+
+.checkout-hero {
+  padding-bottom: 22px;
+  background: #eef5ef;
+}
+
+.checkout-hero h1 {
+  font-size: clamp(2.6rem, 7vw, 5.25rem);
+}
+
+.checkout-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 400px);
+  gap: 24px;
+  align-items: start;
+}
+
+.checkout-product,
+.checkout-summary,
+.payment-modal-panel,
+.payment-preview {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  box-shadow: 0 14px 34px rgba(32, 36, 42, 0.08);
+}
+
+.checkout-product {
+  display: grid;
+  gap: 18px;
+  padding: 22px;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.checkout-visual {
+  display: grid;
+  min-height: 320px;
+  place-items: center;
+  border-radius: 8px;
+  background: #090d14;
+  overflow: hidden;
+}
+
+.checkout-visual[data-checkout-category="permanents"] {
+  min-height: 220px;
+}
+
+.checkout-visual[data-checkout-category="permanents"] img {
+  max-width: 180px;
+  max-height: 180px;
+}
+
+.checkout-visual img {
+  width: auto;
+  max-width: 100%;
+  max-height: 320px;
+  object-fit: contain;
+}
+
+.checkout-meta {
+  display: grid;
+  gap: 14px;
+}
+
+.checkout-summary {
+  display: grid;
+  gap: 18px;
+  padding: 22px;
+  position: sticky;
+  top: 96px;
+}
+
+.quantity-panel {
+  display: grid;
+  gap: 10px;
+}
+
+.quantity-label {
+  font-weight: 800;
+}
+
+.quantity-control {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 44px;
+  gap: 10px;
+  align-items: center;
+}
+
+.qty-button,
+.modal-close {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 800;
+}
+
+.qty-button {
+  min-height: 44px;
+}
+
+.quantity-control input {
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  text-align: center;
+  font: inherit;
+  font-weight: 800;
+}
+
+.summary-list {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+}
+
+.summary-list div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.summary-list dt {
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.summary-list dd {
+  margin: 0;
+  font-weight: 800;
+  text-align: right;
+}
+
+.summary-total {
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+
+.payment-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+}
+
+.payment-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(21, 23, 26, 0.56);
+}
+
+.payment-modal-panel {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 18px;
+  width: min(620px, 100%);
+  padding: 24px;
+}
+
+.modal-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 40px;
+  height: 40px;
+}
+
+.payment-modal-copy {
+  color: var(--muted);
+}
+
+.payment-methods {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.payment-method {
+  display: grid;
+  gap: 6px;
+  min-height: 120px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #f8faf8;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+}
+
+.payment-method.is-selected {
+  border-color: rgba(22, 184, 199, 0.5);
+  background: #eef9f7;
+  box-shadow: 0 14px 34px rgba(22, 184, 199, 0.12);
+}
+
+.payment-method-title {
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.payment-method-copy {
+  color: var(--muted);
+}
+
+.payment-preview {
+  padding: 16px 18px;
+  background: #f5f7f6;
+}
+
+.payment-preview-title {
+  margin: 0 0 8px;
+  font-weight: 800;
+}
+
+.modal-open {
+  overflow: hidden;
+}
+
 @media (max-width: 880px) {
   .site-header {
     gap: 10px;
@@ -841,7 +1076,8 @@ h3 {
   }
 
   .hero,
-  .split-section {
+  .split-section,
+  .checkout-layout {
     grid-template-columns: 1fr;
   }
 
@@ -862,6 +1098,14 @@ h3 {
   .products[data-active-category="permanents"] {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .checkout-summary {
+    position: static;
+  }
+
+  .payment-methods {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 560px) {
@@ -880,6 +1124,16 @@ h3 {
 
   .products[data-active-category="permanents"] {
     grid-template-columns: 1fr;
+  }
+
+  .quantity-control {
+    grid-template-columns: 40px minmax(0, 1fr) 40px;
+  }
+
+  .checkout-product,
+  .checkout-summary,
+  .payment-modal-panel {
+    padding: 16px;
   }
 
   .site-footer {

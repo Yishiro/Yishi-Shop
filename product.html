@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Finalise ta commande sur Yishi's Shop."
+    />
+    <title>Commande | Yishi's Shop</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css?v=t3ch-12" />
+  </head>
+  <body>
+    <header class="site-header" data-header>
+      <div class="header-left">
+        <a class="brand" href="index.html" aria-label="Retour a l'accueil">
+          <span class="brand-mark">YS</span>
+          <span>Yishi's Shop</span>
+        </a>
+
+        <details class="catalog-menu">
+          <summary aria-label="Ouvrir les categories">
+            <span class="menu-icon" aria-hidden="true">
+              <span></span>
+              <span></span>
+              <span></span>
+            </span>
+            <span>Shop</span>
+          </summary>
+          <div class="catalog-panel">
+            <details class="game-menu" open>
+              <summary>Blox Fruit</summary>
+              <div class="category-list">
+                <a href="category.html?category=skins&v=t3ch-12">Skins</a>
+                <a href="category.html?category=fruits&v=t3ch-12">Fruits</a>
+                <a href="category.html?category=permanents&v=t3ch-12">Permanents</a>
+                <a href="category.html?category=gamepass&v=t3ch-12">Gamepass</a>
+                <a href="category.html?category=boosts&v=t3ch-12">Boosts</a>
+              </div>
+            </details>
+            <details class="game-menu">
+              <summary>Blade Ball</summary>
+              <div class="category-list">
+                <a href="category.html?category=token&v=t3ch-12">Token</a>
+              </div>
+            </details>
+            <details class="game-menu">
+              <summary>T3CH</summary>
+              <div class="category-list">
+                <a href="category.html?category=t3ch-products&v=t3ch-12">Produits</a>
+              </div>
+            </details>
+          </div>
+        </details>
+      </div>
+
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
+      <nav class="site-nav" id="site-nav">
+        <a href="category.html?category=skins&v=t3ch-12">Offres</a>
+        <a href="index.html#avis">Avis</a>
+        <a href="index.html#faq">FAQ</a>
+        <a href="cgv.html">CGV</a>
+        <a class="nav-cta" href="index.html#commander">Commander</a>
+      </nav>
+    </header>
+
+    <main id="top" class="checkout-page">
+      <section class="section checkout-hero">
+        <div class="section-heading">
+          <p class="eyebrow" data-checkout-tag>Produit</p>
+          <h1 data-checkout-title>Commande</h1>
+          <p data-checkout-copy>
+            Choisis la quantite souhaitee puis selectionne ton moyen de paiement.
+          </p>
+        </div>
+      </section>
+
+      <section class="section checkout-layout">
+        <article class="checkout-product">
+          <a class="back-link" href="category.html?category=skins&v=t3ch-12" data-checkout-back>
+            Retour a la boutique
+          </a>
+          <div class="checkout-visual" data-checkout-visual>
+            <img src="assets/kitsune-galaxy.webp" alt="" data-checkout-image />
+          </div>
+          <div class="checkout-meta">
+            <div class="product-top">
+              <span class="product-tag" data-checkout-tag-chip>Produit</span>
+              <span class="price" data-checkout-price>0 €</span>
+            </div>
+            <h2 data-checkout-name>Produit</h2>
+            <p data-checkout-description>
+              Produit disponible sur le shop. Finalise ici ta commande avant le paiement.
+            </p>
+          </div>
+        </article>
+
+        <aside class="checkout-summary">
+          <h2>Resume</h2>
+          <div class="quantity-panel">
+            <span class="quantity-label">Quantite</span>
+            <div class="quantity-control" data-quantity-control>
+              <button type="button" class="qty-button" data-qty-action="decrease" aria-label="Diminuer">
+                -
+              </button>
+              <input
+                type="number"
+                min="1"
+                max="99"
+                value="1"
+                inputmode="numeric"
+                data-qty-input
+                aria-label="Quantite"
+              />
+              <button type="button" class="qty-button" data-qty-action="increase" aria-label="Augmenter">
+                +
+              </button>
+            </div>
+          </div>
+
+          <dl class="summary-list">
+            <div>
+              <dt>Produit</dt>
+              <dd data-summary-name>Produit</dd>
+            </div>
+            <div>
+              <dt>Prix unitaire</dt>
+              <dd data-summary-unit>0 €</dd>
+            </div>
+            <div>
+              <dt>Quantite</dt>
+              <dd data-summary-qty>1</dd>
+            </div>
+            <div class="summary-total">
+              <dt>Total</dt>
+              <dd data-summary-total>0 €</dd>
+            </div>
+          </dl>
+
+          <button type="button" class="button button-primary full-width" data-open-payment>
+            Payer
+          </button>
+          <p class="fine-print">
+            En poursuivant, tu acceptes les <a href="cgv.html">CGV</a>.
+          </p>
+        </aside>
+      </section>
+    </main>
+
+    <div class="payment-modal" data-payment-modal hidden>
+      <div class="payment-modal-backdrop" data-close-payment></div>
+      <div class="payment-modal-panel" role="dialog" aria-modal="true" aria-labelledby="payment-modal-title">
+        <button type="button" class="modal-close" data-close-payment aria-label="Fermer">
+          ×
+        </button>
+        <p class="eyebrow">Paiement</p>
+        <h2 id="payment-modal-title">Choisis ton moyen de paiement</h2>
+        <p class="payment-modal-copy">
+          Selectionne comment tu veux payer ce produit. Le branchement Stripe et PayPal sera relie ici ensuite.
+        </p>
+
+        <div class="payment-methods">
+          <button type="button" class="payment-method payment-method-card" data-payment-method="card">
+            <span class="payment-method-title">Carte bancaire</span>
+            <span class="payment-method-copy">Paiement CB via Stripe</span>
+          </button>
+          <button type="button" class="payment-method payment-method-paypal" data-payment-method="paypal">
+            <span class="payment-method-title">PayPal</span>
+            <span class="payment-method-copy">Paiement via ton compte PayPal</span>
+          </button>
+        </div>
+
+        <div class="payment-preview" data-payment-preview>
+          <p class="payment-preview-title">Apercu</p>
+          <p data-payment-preview-text>
+            Selectionne une methode pour voir le parcours de paiement.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <footer class="site-footer">
+      <p>© <span data-year></span> Yishi's Shop. Tous droits reserves.</p>
+      <div class="footer-links">
+        <a href="mentions-legales.html">Mentions légales</a>
+        <a href="cgv.html">CGV</a>
+        <a href="politique-confidentialite.html">Politique de confidentialité</a>
+        <a href="index.html#top">Retour en haut</a>
+      </div>
+    </footer>
+
+    <script src="script.js?v=t3ch-12"></script>
+  </body>
+</html>
