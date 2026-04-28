@@ -473,6 +473,11 @@ h3 {
   justify-content: center;
 }
 
+.products[data-active-category="permanents"] {
+  grid-template-columns: repeat(5, minmax(180px, 1fr));
+  gap: 14px;
+}
+
 .product-card,
 .reviews figure,
 .order-panel,
@@ -508,6 +513,35 @@ h3 {
   max-width: 100%;
   max-height: 320px;
   object-fit: contain;
+}
+
+.product-card[data-product-category="permanents"] {
+  gap: 12px;
+  padding: 14px;
+}
+
+.product-card[data-product-category="permanents"] .product-image {
+  min-height: 136px;
+}
+
+.product-card[data-product-category="permanents"] .product-image img {
+  max-width: 108px;
+  max-height: 108px;
+}
+
+.product-card[data-product-category="permanents"] h3 {
+  font-size: 1.02rem;
+}
+
+.product-card[data-product-category="permanents"] p {
+  font-size: 0.86rem;
+  line-height: 1.4;
+}
+
+.product-card[data-product-category="permanents"] .card-link {
+  min-height: 40px;
+  padding: 10px 14px;
+  font-size: 0.92rem;
 }
 
 .product-image-crimson {
@@ -775,6 +809,10 @@ h3 {
   .trust-band {
     grid-template-columns: 1fr;
   }
+
+  .products[data-active-category="permanents"] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 560px) {
@@ -789,6 +827,10 @@ h3 {
   .button,
   .card-link {
     width: 100%;
+  }
+
+  .products[data-active-category="permanents"] {
+    grid-template-columns: 1fr;
   }
 
   .site-footer {

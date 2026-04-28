@@ -179,6 +179,10 @@ if (categoryTitle && productCards.length) {
     categoryCopy.textContent = selected.copy;
   }
 
+  if (productContainer) {
+    productContainer.dataset.activeCategory = selectedCategory;
+  }
+
   categoryLinks.forEach((link) => {
     link.classList.toggle(
       "is-active",
