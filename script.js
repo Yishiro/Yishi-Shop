@@ -66,6 +66,13 @@ let activeConversationMode = "";
 let activeConversationUnread = 0;
 let currentAccountOrders = [];
 let currentAdminOrders = [];
+let currentAuthenticatedUser = null;
+let ordersPollTimer = null;
+let audioUnlocked = false;
+let lastUnreadSnapshot = {
+  buyer: 0,
+  admin: 0,
+};
 const supabaseConfig = window.YISHI_SUPABASE_CONFIG || null;
 const currentPath = window.location.pathname;
 const isAccountPage =
@@ -159,15 +166,15 @@ const isPendingOrderExpired = (order) => {
 
 const getOrderStatusLabel = (status) => {
   if (status === "paid") {
-    return "Payee";
+    return "A faire";
   }
 
   if (status === "delivered") {
-    return "Livree";
+    return "Termine";
   }
 
   if (status === "processing") {
-    return "En preparation";
+    return "En cours";
   }
 
   if (status === "cancelled") {
@@ -225,6 +232,74 @@ const updateAdminEntries = (isAdmin) => {
     entry.hidden = !isAdmin;
   });
 };
+
+const getUnreadTotal = (orders = [], mode) =>
+  orders.reduce((total, order) => total + getUnreadCount(order, mode), 0);
+
+const ensureNoticeStack = () => {
+  let stack = document.querySelector("[data-live-notices]");
+  if (!stack) {
+    stack = document.createElement("div");
+    stack.className = "live-notice-stack";
+    stack.dataset.liveNotices = "true";
+    document.body.appendChild(stack);
+  }
+
+  return stack;
+};
+
+const playNotificationTone = () => {
+  if (!audioUnlocked || typeof window.AudioContext === "undefined") {
+    return;
+  }
+
+  const audioContext = new window.AudioContext();
+  const oscillator = audioContext.createOscillator();
+  const gainNode = audioContext.createGain();
+
+  oscillator.type = "sine";
+  oscillator.frequency.value = 880;
+  gainNode.gain.value = 0.02;
+
+  oscillator.connect(gainNode);
+  gainNode.connect(audioContext.destination);
+  oscillator.start();
+  oscillator.stop(audioContext.currentTime + 0.12);
+};
+
+const showLiveNotice = (message) => {
+  if (!message) {
+    return;
+  }
+
+  const stack = ensureNoticeStack();
+  const notice = document.createElement("article");
+  notice.className = "live-notice";
+  notice.innerHTML = `<strong>Nouveau message</strong><span>${message}</span>`;
+  stack.appendChild(notice);
+  playNotificationTone();
+
+  const previousTitle = document.title;
+  document.title = `• ${previousTitle}`;
+  window.setTimeout(() => {
+    if (document.title.startsWith("• ")) {
+      document.title = previousTitle;
+    }
+  }, 2800);
+
+  window.setTimeout(() => {
+    notice.remove();
+  }, 4800);
+};
+
+const unlockNotificationSound = () => {
+  audioUnlocked = true;
+  document.removeEventListener("pointerdown", unlockNotificationSound);
+  document.removeEventListener("keydown", unlockNotificationSound);
+};
+
+document.addEventListener("pointerdown", unlockNotificationSound, { once: true });
+document.addEventListener("keydown", unlockNotificationSound, { once: true });
 
 const renderOrders = (orders = [], message) => {
   if (!accountOrders) {
@@ -325,9 +400,9 @@ const renderAdminOrders = (orders = [], message) => {
       </div>
       <div class="admin-order-controls">
         <select data-admin-status="${order.id}">
-          <option value="paid"${order.status === "paid" ? " selected" : ""}>Payee</option>
-          <option value="processing"${order.status === "processing" ? " selected" : ""}>En preparation</option>
-          <option value="delivered"${order.status === "delivered" ? " selected" : ""}>Livree</option>
+          <option value="paid"${order.status === "paid" ? " selected" : ""}>A faire</option>
+          <option value="processing"${order.status === "processing" ? " selected" : ""}>En cours</option>
+          <option value="delivered"${order.status === "delivered" ? " selected" : ""}>Terminee</option>
           <option value="cancelled"${order.status === "cancelled" ? " selected" : ""}>Annulee</option>
         </select>
         <button type="button" class="button button-secondary" data-admin-update="${order.id}">Mettre a jour</button>
@@ -358,15 +433,15 @@ const renderAdminStats = (orders = []) => {
       <strong>${orders.length}</strong>
     </article>
     <article class="admin-stat-card">
-      <span>Payees</span>
+      <span>A faire</span>
       <strong>${paidCount}</strong>
     </article>
     <article class="admin-stat-card">
-      <span>En preparation</span>
+      <span>En cours</span>
       <strong>${processingCount}</strong>
     </article>
     <article class="admin-stat-card">
-      <span>Livrees</span>
+      <span>Terminees</span>
       <strong>${deliveredCount}</strong>
     </article>
   `;
@@ -424,6 +499,10 @@ const renderAdminDetail = (order) => {
       <strong>${order.last_message_preview || "Aucun message"}</strong>
     </div>
     <div class="admin-detail-item">
+      <span>Messages non lus</span>
+      <strong>${getUnreadCount(order, "admin")}</strong>
+    </div>
+    <div class="admin-detail-item">
       <span>Date</span>
       <strong>${formatOrderDate(order.created_at)}</strong>
     </div>
@@ -442,7 +521,11 @@ const applyAdminFilters = () => {
 
   const filteredOrders = currentAdminOrders.filter((order) => {
     const matchesStatus =
-      filterValue === "all" ? true : String(order.status) === filterValue;
+      filterValue === "all"
+        ? true
+        : filterValue === "unread"
+          ? getUnreadCount(order, "admin") > 0
+          : String(order.status) === filterValue;
     const haystack = [
       order.product_title,
       order.user_email,
@@ -467,7 +550,7 @@ const applyAdminFilters = () => {
   }
 };
 
-const loadAccountOrders = async (user) => {
+const loadAccountOrders = async (user, notify = false) => {
   if (!supabaseClient || !accountOrders || !user) {
     return;
   }
@@ -489,11 +572,17 @@ const loadAccountOrders = async (user) => {
     return;
   }
 
-  renderOrders(data || []);
+  const orders = data || [];
+  renderOrders(orders);
   bindConversationButtons("buyer");
+  if (notify) {
+    maybeNotifyAboutUnread(orders, "buyer");
+  } else {
+    lastUnreadSnapshot.buyer = getUnreadTotal(orders, "buyer");
+  }
 
   if (activeConversationMode === "buyer" && activeConversationOrderId) {
-    const activeOrder = (data || []).find((order) => order.id === activeConversationOrderId);
+    const activeOrder = orders.find((order) => order.id === activeConversationOrderId);
     activeConversationUnread = getUnreadCount(activeOrder, "buyer");
     if (markReadButton) {
       markReadButton.disabled = activeConversationUnread <= 0;
@@ -505,7 +594,7 @@ const loadAccountOrders = async (user) => {
   }
 };
 
-const loadAdminOrders = async () => {
+const loadAdminOrders = async (notify = false) => {
   if (!supabaseClient || !adminOrders) {
     return;
   }
@@ -529,12 +618,18 @@ const loadAdminOrders = async () => {
     return;
   }
 
-  renderAdminOrders(result.orders || []);
-  renderAdminStats(result.orders || []);
+  const orders = result.orders || [];
+  renderAdminOrders(orders);
+  renderAdminStats(orders);
   bindConversationButtons("admin");
+  if (notify) {
+    maybeNotifyAboutUnread(orders, "admin");
+  } else {
+    lastUnreadSnapshot.admin = getUnreadTotal(orders, "admin");
+  }
 
   if (activeConversationOrderId) {
-    const activeOrder = (result.orders || []).find(
+    const activeOrder = orders.find(
       (order) => order.id === activeConversationOrderId
     );
     renderAdminDetail(activeOrder || null);
@@ -717,6 +812,54 @@ const markConversationAsRead = async () => {
   } else {
     await loadAccountOrders(session?.user);
   }
+};
+
+const maybeNotifyAboutUnread = (orders, mode) => {
+  const nextTotal = getUnreadTotal(orders, mode);
+  const previousTotal = lastUnreadSnapshot[mode] || 0;
+
+  if (nextTotal > previousTotal) {
+    const delta = nextTotal - previousTotal;
+    showLiveNotice(
+      mode === "admin"
+        ? `${delta} nouveau${delta > 1 ? "x" : ""} message${delta > 1 ? "s" : ""} client.`
+        : `${delta} nouvelle${delta > 1 ? "s" : ""} reponse${delta > 1 ? "s" : ""} du shop.`
+    );
+  }
+
+  lastUnreadSnapshot[mode] = nextTotal;
+};
+
+const stopOrdersPolling = () => {
+  if (ordersPollTimer) {
+    window.clearInterval(ordersPollTimer);
+    ordersPollTimer = null;
+  }
+};
+
+const startOrdersPolling = () => {
+  stopOrdersPolling();
+
+  if (!supabaseClient || !currentAuthenticatedUser) {
+    return;
+  }
+
+  const isAdmin = isAdminUser(currentAuthenticatedUser);
+  ordersPollTimer = window.setInterval(async () => {
+    if (document.hidden) {
+      return;
+    }
+
+    if (isAdmin) {
+      await loadAdminOrders(true);
+    } else {
+      await loadAccountOrders(currentAuthenticatedUser, true);
+    }
+
+    if (activeConversationOrderId && activeConversationMode) {
+      await loadConversation(activeConversationOrderId, activeConversationMode);
+    }
+  }, 20000);
 };
 
 const bindConversationButtons = (mode) => {
@@ -1395,6 +1538,7 @@ const applyAccountView = (user) => {
   }
 
   if (user) {
+    currentAuthenticatedUser = user;
     const displayName = getUserDisplayName(user);
     const isAdmin = isAdminUser(user);
     accountName.textContent = `Bonjour ${displayName}`;
@@ -1424,6 +1568,7 @@ const applyAccountView = (user) => {
           await supabaseClient.auth.signOut();
         }
 
+        stopOrdersPolling();
         window.location.href = "login.html";
       });
     }
@@ -1432,9 +1577,13 @@ const applyAccountView = (user) => {
     if (isAdmin) {
       loadAdminOrders();
     }
+    startOrdersPolling();
 
     return;
   }
+
+  currentAuthenticatedUser = null;
+  stopOrdersPolling();
 
   accountName.textContent = "Mon compte";
 
@@ -1508,7 +1657,9 @@ const handleSupabaseAuth = async () => {
     if (accountName) {
       accountName.textContent = "Admin";
     }
+    currentAuthenticatedUser = currentUser;
     loadAdminOrders();
+    startOrdersPolling();
   } else if (currentUser) {
     updateAdminEntries(isAdminUser(currentUser));
     if (currentPath.endsWith("/login.html") || currentPath.endsWith("/signup.html")) {
