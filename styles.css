@@ -1028,6 +1028,127 @@ h3 {
   overflow: hidden;
 }
 
+.auth-page,
+.account-page {
+  padding-bottom: 42px;
+}
+
+.auth-layout,
+.account-layout {
+  display: grid;
+  gap: 24px;
+}
+
+.auth-layout {
+  grid-template-columns: minmax(0, 0.95fr) minmax(320px, 430px);
+  align-items: start;
+}
+
+.auth-copy {
+  display: grid;
+  gap: 14px;
+}
+
+.auth-card,
+.account-card {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  box-shadow: 0 14px 34px rgba(32, 36, 42, 0.08);
+}
+
+.auth-card {
+  display: grid;
+  gap: 16px;
+  padding: 22px;
+}
+
+.field {
+  display: grid;
+  gap: 8px;
+}
+
+.field span {
+  font-weight: 800;
+}
+
+.field input {
+  min-height: 46px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0 14px;
+  font: inherit;
+}
+
+.auth-switch {
+  margin: 0;
+  color: var(--muted);
+}
+
+.auth-switch a {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.account-hero {
+  padding-bottom: 22px;
+  background: #eef5ef;
+}
+
+.account-layout {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.account-card {
+  display: grid;
+  gap: 16px;
+  padding: 22px;
+}
+
+.account-list {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+}
+
+.account-list div {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.account-list dt {
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.account-list dd {
+  margin: 0;
+  font-weight: 800;
+  text-align: right;
+}
+
+.account-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.account-order-list,
+.account-bullets {
+  display: grid;
+  gap: 12px;
+}
+
+.account-order {
+  display: grid;
+  gap: 4px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #f7faf8;
+}
+
 @media (max-width: 880px) {
   .site-header {
     gap: 10px;
@@ -1077,7 +1198,9 @@ h3 {
 
   .hero,
   .split-section,
-  .checkout-layout {
+  .checkout-layout,
+  .auth-layout,
+  .account-layout {
     grid-template-columns: 1fr;
   }
 
@@ -1132,7 +1255,9 @@ h3 {
 
   .checkout-product,
   .checkout-summary,
-  .payment-modal-panel {
+  .payment-modal-panel,
+  .auth-card,
+  .account-card {
     padding: 16px;
   }
 

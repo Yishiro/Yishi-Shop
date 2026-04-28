@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Connexion a ton compte Yishi's Shop."
+    />
+    <title>Connexion | Yishi's Shop</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css?v=t3ch-13" />
+  </head>
+  <body>
+    <header class="site-header" data-header>
+      <div class="header-left">
+        <a class="brand" href="index.html" aria-label="Retour a l'accueil">
+          <span class="brand-mark">YS</span>
+          <span>Yishi's Shop</span>
+        </a>
+      </div>
+
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
+      <nav class="site-nav" id="site-nav">
+        <a href="category.html?category=skins&v=t3ch-13">Offres</a>
+        <a href="account.html">Mon compte</a>
+        <a href="cgv.html">CGV</a>
+        <a class="nav-cta" href="signup.html">Inscription</a>
+      </nav>
+    </header>
+
+    <main class="auth-page">
+      <section class="section auth-layout">
+        <div class="auth-copy">
+          <p class="eyebrow">Compte client</p>
+          <h1>Connexion</h1>
+          <p>
+            Connecte-toi pour retrouver tes commandes, ton historique et ton espace
+            client Yishi's Shop.
+          </p>
+        </div>
+
+        <form class="auth-card" data-auth-form="login">
+          <h2>Heureux de te revoir</h2>
+          <label class="field">
+            <span>Email</span>
+            <input type="email" name="email" placeholder="yishisshop@gmail.com" required />
+          </label>
+          <label class="field">
+            <span>Mot de passe</span>
+            <input type="password" name="password" placeholder="Ton mot de passe" required />
+          </label>
+          <button type="submit" class="button button-primary full-width">Se connecter</button>
+          <p class="auth-switch">
+            Pas encore de compte ? <a href="signup.html">Creer un compte</a>
+          </p>
+          <p class="fine-print" data-auth-feedback>
+            Cette version simule la connexion pour preparer l'integration reelle.
+          </p>
+        </form>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <p>© <span data-year></span> Yishi's Shop. Tous droits reserves.</p>
+      <div class="footer-links">
+        <a href="mentions-legales.html">Mentions légales</a>
+        <a href="cgv.html">CGV</a>
+        <a href="politique-confidentialite.html">Politique de confidentialité</a>
+      </div>
+    </footer>
+
+    <script src="script.js?v=t3ch-13"></script>
+  </body>
+</html>

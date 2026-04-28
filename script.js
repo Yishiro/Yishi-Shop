@@ -34,7 +34,15 @@ const paymentModal = document.querySelector("[data-payment-modal]");
 const closePaymentButtons = document.querySelectorAll("[data-close-payment]");
 const paymentMethodButtons = document.querySelectorAll("[data-payment-method]");
 const paymentPreviewText = document.querySelector("[data-payment-preview-text]");
+const authForms = document.querySelectorAll("[data-auth-form]");
+const accountName = document.querySelector("[data-account-name]");
+const accountEmail = document.querySelector("[data-account-email]");
+const accountDisplay = document.querySelector("[data-account-display]");
+const accountMail = document.querySelector("[data-account-mail]");
+const accountStatus = document.querySelector("[data-account-status]");
+const logoutButton = document.querySelector("[data-logout]");
 const sortModes = ["price-asc", "price-desc", "name-asc", "name-desc"];
+const accountStorageKey = "yishi-shop-account";
 
 const categories = {
   skins: {
@@ -81,6 +89,23 @@ const formatPrice = (value) =>
     minimumFractionDigits: value % 1 === 0 ? 0 : 2,
     maximumFractionDigits: 2,
   }).format(value);
+
+const readAccount = () => {
+  try {
+    const rawAccount = window.localStorage.getItem(accountStorageKey);
+    return rawAccount ? JSON.parse(rawAccount) : null;
+  } catch {
+    return null;
+  }
+};
+
+const saveAccount = (account) => {
+  window.localStorage.setItem(accountStorageKey, JSON.stringify(account));
+};
+
+const clearAccount = () => {
+  window.localStorage.removeItem(accountStorageKey);
+};
 
 if (year) {
   year.textContent = new Date().getFullYear();
@@ -160,7 +185,7 @@ const getProductPayload = (card) => {
 
 const buildProductUrl = (payload) => {
   const params = new URLSearchParams(payload);
-  params.set("v", "t3ch-12");
+  params.set("v", "t3ch-13");
   return `product.html?${params.toString()}`;
 };
 
@@ -248,7 +273,7 @@ if (categoryTitle && productCards.length) {
       const nextParams = new URLSearchParams(window.location.search);
       nextParams.set("category", selectedCategory);
       nextParams.set("sort", productSort.value);
-      nextParams.set("v", "t3ch-12");
+      nextParams.set("v", "t3ch-13");
       window.history.replaceState(null, "", `?${nextParams.toString()}`);
       sortProducts(productSort.value);
       updateVisibleProducts();
@@ -346,7 +371,7 @@ if (checkoutTitle && qtyInput) {
   if (checkoutBack) {
     checkoutBack.setAttribute(
       "href",
-      `category.html?category=${encodeURIComponent(category)}&v=t3ch-12`
+      `category.html?category=${encodeURIComponent(category)}&v=t3ch-13`
     );
   }
 
@@ -419,4 +444,80 @@ if (checkoutTitle && qtyInput) {
   });
 
   updateCheckout();
+}
+
+if (authForms.length) {
+  authForms.forEach((form) => {
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+
+      const formData = new FormData(form);
+      const email = String(formData.get("email") || "").trim();
+      const displayName =
+        String(formData.get("displayName") || "").trim() ||
+        email.split("@")[0] ||
+        "Client";
+      const feedback = form.querySelector("[data-auth-feedback]");
+
+      saveAccount({
+        email,
+        displayName,
+        status: "Connecte",
+      });
+
+      if (feedback) {
+        feedback.textContent =
+          form.dataset.authForm === "signup"
+            ? "Compte cree. Redirection vers ton espace client..."
+            : "Connexion reussie. Redirection vers ton espace client...";
+      }
+
+      window.setTimeout(() => {
+        window.location.href = "account.html";
+      }, 500);
+    });
+  });
+}
+
+if (accountName) {
+  const account = readAccount();
+
+  if (account) {
+    accountName.textContent = `Bonjour ${account.displayName}`;
+    if (accountEmail) {
+      accountEmail.textContent = account.email;
+    }
+    if (accountDisplay) {
+      accountDisplay.textContent = account.displayName;
+    }
+    if (accountMail) {
+      accountMail.textContent = account.email;
+    }
+    if (accountStatus) {
+      accountStatus.textContent = account.status || "Connecte";
+    }
+    if (logoutButton) {
+      logoutButton.hidden = false;
+      logoutButton.addEventListener("click", () => {
+        clearAccount();
+        window.location.href = "login.html";
+      });
+    }
+  } else {
+    if (accountName) {
+      accountName.textContent = "Mon compte";
+    }
+    if (accountEmail) {
+      accountEmail.textContent = "Connecte-toi pour retrouver ton espace client.";
+    }
+    if (accountDisplay) {
+      accountDisplay.textContent = "Invite";
+    }
+    if (accountMail) {
+      accountMail.textContent = "Non connecte";
+    }
+    if (accountStatus) {
+      accountStatus.textContent = "Connexion requise";
+    }
+  }
 }
