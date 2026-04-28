@@ -52,3 +52,30 @@ par le vrai lien d'invitation de ton serveur.
 5. Clique sur `Save`.
 
 GitHub donnera ensuite une URL publique pour le site.
+
+## Paiement avec Vercel
+
+Pour le vrai paiement Stripe + PayPal, deploye plutot ce repo sur Vercel afin que les routes `api/` fonctionnent avec le site.
+
+### Variables d'environnement Vercel
+
+Ajoute dans Vercel :
+
+- `PUBLIC_SITE_URL`
+- `SUPABASE_URL`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `STRIPE_SECRET_KEY`
+- `PAYPAL_CLIENT_ID`
+- `PAYPAL_CLIENT_SECRET`
+- `PAYPAL_BASE_URL` (`https://api-m.sandbox.paypal.com` en test)
+
+### Supabase
+
+Execute aussi le fichier `supabase-orders.sql` dans le SQL Editor pour creer ou mettre a jour la table `orders`.
+
+### Parcours
+
+- `product.html` cree une commande `pending_payment`
+- `/api/payments/stripe/create-session` lance Stripe Checkout
+- `/api/payments/paypal/create-order` lance PayPal
+- `payment-return.html` verifie ou capture le paiement puis met la commande a jour en `paid`

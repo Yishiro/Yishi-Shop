@@ -36,6 +36,9 @@ const closePaymentButtons = document.querySelectorAll("[data-close-payment]");
 const paymentMethodButtons = document.querySelectorAll("[data-payment-method]");
 const paymentPreviewText = document.querySelector("[data-payment-preview-text]");
 const paymentSubmitButton = document.querySelector("[data-payment-submit]");
+const paymentStatusTitle = document.querySelector("[data-payment-status-title]");
+const paymentStatusCopy = document.querySelector("[data-payment-status-copy]");
+const paymentStatusMeta = document.querySelector("[data-payment-status-meta]");
 const authForms = document.querySelectorAll("[data-auth-form]");
 const accountName = document.querySelector("[data-account-name]");
 const accountEmail = document.querySelector("[data-account-email]");
@@ -510,6 +513,59 @@ if (checkoutTitle && qtyInput) {
     checkoutFeedback.style.color = isError ? "#c2410c" : "";
   };
 
+  const createPendingOrder = async (userId) => {
+    const quantity = Math.min(99, Math.max(1, Number(qtyInput.value) || 1));
+    const total = Number((price * quantity).toFixed(2));
+
+    const { data, error } = await supabaseClient
+      .from("orders")
+      .insert({
+        user_id: userId,
+        product_title: title,
+        product_category: category,
+        product_image: image,
+        unit_price: Number(price.toFixed(2)),
+        quantity,
+        total_price: total,
+        payment_method: selectedPaymentMethod,
+        status: "pending_payment",
+      })
+      .select("id, quantity, total_price")
+      .single();
+
+    return { data, error };
+  };
+
+  const requestPaymentRedirect = async (order) => {
+    const endpoint =
+      selectedPaymentMethod === "paypal"
+        ? "/api/payments/paypal/create-order"
+        : "/api/payments/stripe/create-session";
+
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        orderId: order.id,
+        productTitle: title,
+        category,
+        quantity: order.quantity,
+        unitPrice: Number(price.toFixed(2)),
+        totalPrice: Number(order.total_price),
+      }),
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.error || "Impossible de lancer le paiement.");
+    }
+
+    return result;
+  };
+
   if (openPaymentButton) {
     openPaymentButton.addEventListener("click", async () => {
       if (!supabaseClient) {
@@ -557,7 +613,7 @@ if (checkoutTitle && qtyInput) {
       });
 
       paymentPreviewText.textContent =
-        button.dataset.paymentMethod === "paypal"
+        selectedPaymentMethod === "paypal"
           ? `PayPal selectionné pour ${title}. La redirection PayPal sera branchée ici ensuite avec le montant ${formatPrice(
               price * (Number(qtyInput.value) || 1)
             )}.`
@@ -585,26 +641,15 @@ if (checkoutTitle && qtyInput) {
       }
 
       paymentSubmitButton.disabled = true;
-      paymentSubmitButton.textContent = "Enregistrement...";
+      paymentSubmitButton.textContent = "Preparation...";
 
-      const quantity = Math.min(99, Math.max(1, Number(qtyInput.value) || 1));
-      const total = Number((price * quantity).toFixed(2));
+      const { data: order, error: orderError } = await createPendingOrder(
+        session.user.id
+      );
 
-      const { error } = await supabaseClient.from("orders").insert({
-        user_id: session.user.id,
-        product_title: title,
-        product_category: category,
-        product_image: image,
-        unit_price: Number(price.toFixed(2)),
-        quantity,
-        total_price: total,
-        payment_method: selectedPaymentMethod,
-        status: "pending_payment",
-      });
-
-      if (error) {
+      if (orderError) {
         updateCheckoutFeedback(
-          isOrdersTableMissing(error)
+          isOrdersTableMissing(orderError)
             ? "Il faut d'abord creer la table orders dans Supabase avec le fichier supabase-orders.sql."
             : "Impossible d'enregistrer la commande pour le moment.",
           true
@@ -614,19 +659,18 @@ if (checkoutTitle && qtyInput) {
         return;
       }
 
-      closeModal();
-      updateCheckoutFeedback(
-        'Commande enregistree sur ton compte. Tu peux la retrouver dans <a href="account.html">Mon compte</a>.'
-      );
-      paymentSubmitButton.disabled = true;
-      paymentSubmitButton.textContent = "Continuer";
-      selectedPaymentMethod = "";
-      paymentMethodButtons.forEach((item) => {
-        item.classList.remove("is-selected");
-      });
-      if (paymentPreviewText) {
-        paymentPreviewText.textContent =
-          "Commande enregistree. Le paiement Stripe ou PayPal sera branche ici a l'etape suivante.";
+      try {
+        const paymentResult = await requestPaymentRedirect(order);
+        if (paymentResult.url) {
+          window.location.href = paymentResult.url;
+          return;
+        }
+
+        throw new Error("Aucune redirection de paiement n'a ete retournee.");
+      } catch (error) {
+        updateCheckoutFeedback(error.message, true);
+        paymentSubmitButton.disabled = false;
+        paymentSubmitButton.textContent = "Continuer";
       }
     });
   }
@@ -639,6 +683,84 @@ if (checkoutTitle && qtyInput) {
 
   updateCheckout();
 }
+
+const handlePaymentReturn = async () => {
+  if (!paymentStatusTitle) {
+    return;
+  }
+
+  const params = new URLSearchParams(window.location.search);
+  const provider = params.get("provider");
+  const orderId = params.get("orderId");
+  const stripeSessionId = params.get("session_id");
+  const paypalOrderId = params.get("token");
+  const isCancelled = params.get("status") === "cancel";
+
+  if (!provider || !orderId) {
+    paymentStatusTitle.textContent = "Retour de paiement invalide";
+    if (paymentStatusCopy) {
+      paymentStatusCopy.textContent =
+        "Les informations de paiement sont incomplètes.";
+    }
+    return;
+  }
+
+  if (isCancelled) {
+    paymentStatusTitle.textContent = "Paiement annule";
+    if (paymentStatusCopy) {
+      paymentStatusCopy.textContent =
+        "Ta commande existe toujours dans ton compte et reste en attente.";
+    }
+    if (paymentStatusMeta) {
+      paymentStatusMeta.textContent = `Commande ${orderId}`;
+    }
+    return;
+  }
+
+  try {
+    const endpoint =
+      provider === "paypal"
+        ? "/api/payments/paypal/capture-order"
+        : "/api/payments/stripe/verify-session";
+
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        orderId,
+        paypalOrderId,
+        stripeSessionId,
+      }),
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.error || "Le paiement n'a pas pu etre verifie.");
+    }
+
+    paymentStatusTitle.textContent = "Paiement confirme";
+    if (paymentStatusCopy) {
+      paymentStatusCopy.textContent =
+        "La commande a ete mise a jour et apparait maintenant comme payee dans ton compte.";
+    }
+    if (paymentStatusMeta) {
+      paymentStatusMeta.textContent = `Commande ${orderId}`;
+    }
+  } catch (error) {
+    paymentStatusTitle.textContent = "Verification en attente";
+    if (paymentStatusCopy) {
+      paymentStatusCopy.textContent = error.message;
+    }
+    if (paymentStatusMeta) {
+      paymentStatusMeta.textContent = `Commande ${orderId}`;
+    }
+  }
+};
+
+handlePaymentReturn();
 
 const setAuthFeedback = (form, message, isError = false) => {
   const feedback = form?.querySelector("[data-auth-feedback]");

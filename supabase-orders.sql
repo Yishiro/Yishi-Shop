@@ -8,9 +8,14 @@ create table if not exists public.orders (
   quantity integer not null check (quantity > 0),
   total_price numeric(10,2) not null,
   payment_method text not null check (payment_method in ('card', 'paypal')),
+  provider_order_id text,
+  provider_session_id text,
   status text not null default 'pending_payment',
   created_at timestamptz not null default timezone('utc', now())
 );
+
+alter table public.orders add column if not exists provider_order_id text;
+alter table public.orders add column if not exists provider_session_id text;
 
 alter table public.orders enable row level security;
 
