@@ -930,6 +930,24 @@ const bindConversationForm = () => {
     return;
   }
 
+  const messageField = conversationForm.querySelector('textarea[name="message"]');
+
+  if (messageField && !messageField.dataset.enterBound) {
+    messageField.dataset.enterBound = "true";
+    messageField.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter" || event.shiftKey) {
+        return;
+      }
+
+      event.preventDefault();
+
+      const submitButton = conversationForm.querySelector('button[type="submit"]');
+      if (submitButton && !submitButton.disabled) {
+        submitButton.click();
+      }
+    });
+  }
+
   conversationForm.addEventListener("submit", async (event) => {
     event.preventDefault();
 
