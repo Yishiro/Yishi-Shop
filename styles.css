@@ -2431,3 +2431,145 @@ h3 {
     grid-template-columns: 1fr;
   }
 }
+
+/* Dark finish requested */
+:root {
+  --bg: #06090d;
+  --surface: rgba(12, 18, 26, 0.92);
+  --ink: #f5f7fb;
+  --muted: #9aa7b4;
+  --line: rgba(255, 255, 255, 0.08);
+  --shadow: 0 26px 60px rgba(0, 0, 0, 0.35);
+}
+
+body {
+  background:
+    radial-gradient(circle at top right, rgba(22, 184, 199, 0.12), transparent 24%),
+    radial-gradient(circle at top left, rgba(168, 216, 63, 0.08), transparent 20%),
+    linear-gradient(180deg, #06090d 0%, #091019 100%);
+  color: var(--ink);
+}
+
+.site-header,
+.site-nav,
+.catalog-menu > summary,
+.catalog-panel,
+.sort-bar,
+.empty-state,
+.auth-card,
+.account-card,
+.product-card,
+.reviews figure,
+.order-panel,
+.faq details,
+.legal-section,
+.checkout-product,
+.checkout-summary,
+.payment-modal-panel,
+.payment-preview,
+.site-nav.is-open {
+  background: rgba(10, 15, 22, 0.86);
+  border-color: rgba(255, 255, 255, 0.08);
+  color: var(--ink);
+}
+
+.category-hero,
+.checkout-hero,
+.account-hero,
+.trust-band p {
+  background: rgba(10, 15, 22, 0.7);
+}
+
+.category-tabs a,
+.category-tabs a.is-active,
+.category-list a.is-active,
+.category-list a:hover,
+.category-list a:focus-visible,
+.site-nav a:hover,
+.site-nav a:focus-visible,
+.catalog-menu > summary:hover,
+.catalog-menu > summary:focus-visible {
+  background: rgba(77, 214, 209, 0.12);
+  color: #fff;
+  border-color: rgba(77, 214, 209, 0.26);
+}
+
+.button-secondary,
+.field input,
+.sort-bar select,
+.field-input,
+.conversation-form textarea,
+.nav-toggle {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.button-secondary:hover,
+.button-secondary:focus-visible {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.hero-stats div,
+.account-order,
+.admin-stat-card,
+.admin-detail-item,
+.message-bubble,
+.product-image,
+.message-badge,
+.account-order-meta span {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+.product-tag {
+  background: rgba(77, 214, 209, 0.12);
+  color: #7ce9e1;
+}
+
+.section-heading p,
+.hero-text,
+.split-section p,
+.account-list dt,
+.sort-bar label,
+.fine-print,
+.footer-links a,
+.site-footer p,
+.account-order-meta,
+.message-preview,
+.trust-band p,
+.legal-section ul,
+.auth-switch,
+.auth-switch a,
+.category-list a,
+.site-nav a {
+  color: var(--muted);
+}
+
+.account-list dd,
+.product-card h3,
+.product-card p,
+.legal-section h2,
+.empty-state h2,
+.empty-state p,
+.faq summary,
+.field span,
+.back-link,
+.brand,
+.trust-band p,
+.site-nav .nav-cta,
+.button-primary,
+.card-link {
+  color: #fff;
+}
+
+.fine-print[data-state="error"] {
+  background: rgba(92, 26, 18, 0.65);
+  color: #ffb4a1;
+}
+
+.fine-print[data-state="success"] {
+  background: rgba(17, 63, 42, 0.7);
+  color: #9bf1c4;
+}

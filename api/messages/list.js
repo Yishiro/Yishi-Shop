@@ -6,6 +6,14 @@ import {
 import { readJsonBody, sendJson } from "../_lib/response.js";
 
 const adminEmail = "yishiroof@gmail.com";
+const getFriendlyError = (error) => {
+  const message = String(error?.message || "");
+  if (/PGRST205|order_messages/i.test(message)) {
+    return "Active d'abord la table order_messages dans Supabase avec le fichier supabase-orders.sql.";
+  }
+
+  return message || "Impossible de charger les messages.";
+};
 
 export default async function handler(request, response) {
   if (request.method !== "POST") {
@@ -47,7 +55,7 @@ export default async function handler(request, response) {
     return sendJson(response, 200, { messages });
   } catch (error) {
     return sendJson(response, 500, {
-      error: error.message || "Impossible de charger les messages.",
+      error: getFriendlyError(error),
     });
   }
 }

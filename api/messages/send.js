@@ -7,6 +7,14 @@ import {
 import { readJsonBody, sendJson } from "../_lib/response.js";
 
 const adminEmail = "yishiroof@gmail.com";
+const getFriendlyError = (error) => {
+  const message = String(error?.message || "");
+  if (/PGRST205|order_messages/i.test(message)) {
+    return "Active d'abord la table order_messages dans Supabase avec le fichier supabase-orders.sql.";
+  }
+
+  return message || "Impossible d'envoyer le message.";
+};
 
 export default async function handler(request, response) {
   if (request.method !== "POST") {
@@ -62,7 +70,7 @@ export default async function handler(request, response) {
     return sendJson(response, 200, { ok: true });
   } catch (error) {
     return sendJson(response, 500, {
-      error: error.message || "Impossible d'envoyer le message.",
+      error: getFriendlyError(error),
     });
   }
 }
