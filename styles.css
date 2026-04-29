@@ -1960,6 +1960,12 @@ h3 {
   align-content: start;
 }
 
+.admin-sidepanel > .account-card:first-child,
+.admin-detail-card {
+  position: static;
+  top: auto;
+}
+
 .account-order-head {
   display: flex;
   align-items: start;
