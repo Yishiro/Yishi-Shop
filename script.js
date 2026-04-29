@@ -46,13 +46,20 @@ const accountDisplay = document.querySelector("[data-account-display]");
 const accountMail = document.querySelector("[data-account-mail]");
 const accountStatus = document.querySelector("[data-account-status]");
 const accountOrders = document.querySelector("[data-account-orders]");
+const accountDetail = document.querySelector("[data-account-detail]");
+const accountDetailEmpty = document.querySelector("[data-account-detail-empty]");
 const adminOrders = document.querySelector("[data-admin-orders]");
 const adminEntries = document.querySelectorAll("[data-admin-entry]");
 const adminStats = document.querySelector("[data-admin-stats]");
 const adminSearch = document.querySelector("[data-admin-search]");
 const adminFilter = document.querySelector("[data-admin-filter]");
+const adminPaymentFilter = document.querySelector("[data-admin-payment-filter]");
+const adminDateFilter = document.querySelector("[data-admin-date-filter]");
 const adminDetail = document.querySelector("[data-admin-detail]");
 const adminDetailEmpty = document.querySelector("[data-admin-detail-empty]");
+const adminNotePanel = document.querySelector("[data-admin-note-panel]");
+const adminNoteField = document.querySelector("[data-admin-note]");
+const adminNoteSaveButton = document.querySelector("[data-admin-note-save]");
 const conversationThread = document.querySelector("[data-conversation-thread]");
 const conversationForm = document.querySelector("[data-conversation-form]");
 const conversationEmpty = document.querySelector("[data-conversation-empty]");
@@ -231,6 +238,35 @@ const getUnreadCount = (order, mode) =>
 const renderUnreadBadge = (count) =>
   count > 0 ? `<span class="message-badge">${count} nouveau${count > 1 ? "x" : ""}</span>` : "";
 
+const formatFileSize = (size) => {
+  const value = Number(size || 0);
+  if (!value) {
+    return "";
+  }
+
+  if (value >= 1024 * 1024) {
+    return `${(value / (1024 * 1024)).toFixed(1)} Mo`;
+  }
+
+  if (value >= 1024) {
+    return `${Math.round(value / 1024)} Ko`;
+  }
+
+  return `${value} o`;
+};
+
+const fileToBase64 = (file) =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = String(reader.result || "");
+      const parts = result.split(",");
+      resolve(parts[1] || "");
+    };
+    reader.onerror = () => reject(new Error("Impossible de lire la piece jointe."));
+    reader.readAsDataURL(file);
+  });
+
 const updateAdminEntries = (isAdmin) => {
   adminEntries.forEach((entry) => {
     entry.hidden = !isAdmin;
@@ -318,6 +354,7 @@ const renderOrders = (orders = [], message) => {
     emptyCard.className = "account-order";
     emptyCard.innerHTML = `<strong>${message}</strong>`;
     accountOrders.appendChild(emptyCard);
+    renderAccountDetail(null);
     return;
   }
 
@@ -327,6 +364,7 @@ const renderOrders = (orders = [], message) => {
     emptyCard.innerHTML =
       "<strong>Aucune commande pour le moment</strong><span>Ton historique apparaitra ici apres tes premiers achats.</span>";
     accountOrders.appendChild(emptyCard);
+    renderAccountDetail(null);
     return;
   }
 
@@ -348,6 +386,7 @@ const renderOrders = (orders = [], message) => {
       <div class="tracking-steps">${renderTrackingMarkup(order.status)}</div>
       ${unreadCount > 0 ? `<div class="message-meta-row">${renderUnreadBadge(unreadCount)}</div>` : ""}
       <div class="account-actions">
+        <button type="button" class="button button-secondary" data-open-detail="${order.id}">Voir le detail</button>
         <button type="button" class="button button-secondary" data-open-conversation="${order.id}">Voir la discussion</button>
       </div>
       <span>${formatOrderDate(order.created_at)}</span>
@@ -430,6 +469,23 @@ const renderAdminStats = (orders = []) => {
   const deliveredCount = orders.filter(
     (order) => order.status === "delivered"
   ).length;
+  const pendingCount = orders.filter(
+    (order) => order.status === "pending_payment"
+  ).length;
+  const unreadCount = getUnreadTotal(orders, "admin");
+  const totalRevenue = orders.reduce(
+    (sum, order) => sum + Number(order.total_price || 0),
+    0
+  );
+  const todayRevenue = orders.reduce((sum, order) => {
+    const orderDate = new Date(order.created_at || "");
+    const today = new Date();
+    const isToday =
+      orderDate.getDate() === today.getDate() &&
+      orderDate.getMonth() === today.getMonth() &&
+      orderDate.getFullYear() === today.getFullYear();
+    return isToday ? sum + Number(order.total_price || 0) : sum;
+  }, 0);
 
   adminStats.innerHTML = `
     <article class="admin-stat-card">
@@ -448,6 +504,22 @@ const renderAdminStats = (orders = []) => {
       <span>Terminees</span>
       <strong>${deliveredCount}</strong>
     </article>
+    <article class="admin-stat-card">
+      <span>En attente paiement</span>
+      <strong>${pendingCount}</strong>
+    </article>
+    <article class="admin-stat-card">
+      <span>Non lus</span>
+      <strong>${unreadCount}</strong>
+    </article>
+    <article class="admin-stat-card">
+      <span>CA total</span>
+      <strong>${formatPrice(totalRevenue)}</strong>
+    </article>
+    <article class="admin-stat-card">
+      <span>CA du jour</span>
+      <strong>${formatPrice(todayRevenue)}</strong>
+    </article>
   `;
 };
 
@@ -460,11 +532,21 @@ const renderAdminDetail = (order) => {
     adminDetail.hidden = true;
     adminDetail.innerHTML = "";
     adminDetailEmpty.hidden = false;
+    if (adminNotePanel) {
+      adminNotePanel.hidden = true;
+    }
     return;
   }
 
   adminDetailEmpty.hidden = true;
   adminDetail.hidden = false;
+  if (adminNotePanel) {
+    adminNotePanel.hidden = false;
+  }
+  if (adminNoteField) {
+    adminNoteField.value = order.admin_note || "";
+    adminNoteField.dataset.orderId = order.id || "";
+  }
   adminDetail.innerHTML = `
     <div class="admin-detail-item">
       <span>Produit</span>
@@ -507,6 +589,68 @@ const renderAdminDetail = (order) => {
       <strong>${getUnreadCount(order, "admin")}</strong>
     </div>
     <div class="admin-detail-item">
+      <span>Derniere activite</span>
+      <strong>${order.last_message_at ? formatOrderDate(order.last_message_at) : "Aucune"}</strong>
+    </div>
+    <div class="admin-detail-item">
+      <span>Date</span>
+      <strong>${formatOrderDate(order.created_at)}</strong>
+    </div>
+  `;
+};
+
+const renderAccountDetail = (order) => {
+  if (!accountDetail || !accountDetailEmpty) {
+    return;
+  }
+
+  if (!order) {
+    accountDetail.hidden = true;
+    accountDetail.innerHTML = "";
+    accountDetailEmpty.hidden = false;
+    return;
+  }
+
+  accountDetailEmpty.hidden = true;
+  accountDetail.hidden = false;
+  accountDetail.innerHTML = `
+    <div class="account-detail-item">
+      <span>Produit</span>
+      <strong>${order.product_title}</strong>
+    </div>
+    <div class="account-detail-item">
+      <span>Commande</span>
+      <strong>#${String(order.id || "").slice(0, 8)}</strong>
+    </div>
+    <div class="account-detail-item">
+      <span>Categorie</span>
+      <strong>${order.product_category || "-"}</strong>
+    </div>
+    <div class="account-detail-item">
+      <span>Prix unitaire</span>
+      <strong>${formatPrice(Number(order.unit_price || 0))}</strong>
+    </div>
+    <div class="account-detail-item">
+      <span>Quantite</span>
+      <strong>${order.quantity}</strong>
+    </div>
+    <div class="account-detail-item">
+      <span>Total</span>
+      <strong>${formatPrice(Number(order.total_price || 0))}</strong>
+    </div>
+    <div class="account-detail-item">
+      <span>Paiement</span>
+      <strong>${getPaymentMethodLabel(order.payment_method)}</strong>
+    </div>
+    <div class="account-detail-item">
+      <span>Statut</span>
+      <strong>${getOrderStatusLabel(order.status)}</strong>
+    </div>
+    <div class="account-detail-item">
+      <span>Dernier message</span>
+      <strong>${order.last_message_preview || "Aucun message"}</strong>
+    </div>
+    <div class="account-detail-item">
       <span>Date</span>
       <strong>${formatOrderDate(order.created_at)}</strong>
     </div>
@@ -530,16 +674,32 @@ const applyAdminFilters = () => {
         : filterValue === "unread"
           ? getUnreadCount(order, "admin") > 0
           : String(order.status) === filterValue;
+    const paymentValue = String(adminPaymentFilter?.value || "all");
+    const dateValue = String(adminDateFilter?.value || "");
+    const matchesPayment =
+      paymentValue === "all" ? true : String(order.payment_method) === paymentValue;
+    const orderDateIso = order.created_at
+      ? new Date(order.created_at).toISOString().slice(0, 10)
+      : "";
+    const matchesDate = dateValue ? orderDateIso === dateValue : true;
     const haystack = [
       order.product_title,
       order.user_email,
       order.id,
       getOrderStatusLabel(order.status),
+      getPaymentMethodLabel(order.payment_method),
+      order.product_category,
+      order.created_at,
     ]
       .join(" ")
       .toLowerCase();
 
-    return matchesStatus && (!searchValue || haystack.includes(searchValue));
+    return (
+      matchesStatus &&
+      matchesPayment &&
+      matchesDate &&
+      (!searchValue || haystack.includes(searchValue))
+    );
   });
 
   renderAdminOrders(filteredOrders);
@@ -562,7 +722,7 @@ const loadAccountOrders = async (user, notify = false) => {
   const { data, error } = await supabaseClient
     .from("orders")
     .select(
-      "id, product_title, quantity, total_price, payment_method, status, created_at, unread_for_buyer, last_message_preview"
+      "id, product_title, product_category, unit_price, quantity, total_price, payment_method, status, created_at, unread_for_buyer, last_message_preview"
     )
     .order("created_at", { ascending: false });
 
@@ -587,6 +747,7 @@ const loadAccountOrders = async (user, notify = false) => {
 
   if (activeConversationMode === "buyer" && activeConversationOrderId) {
     const activeOrder = orders.find((order) => order.id === activeConversationOrderId);
+    renderAccountDetail(activeOrder || null);
     activeConversationUnread = getUnreadCount(activeOrder, "buyer");
     if (markReadButton) {
       markReadButton.disabled = activeConversationUnread <= 0;
@@ -709,7 +870,8 @@ const renderConversation = (messages = []) => {
     item.className = `message-bubble${message.author_role === "admin" ? " is-admin" : " is-buyer"}`;
     item.innerHTML = `
       <strong>${message.author_role === "admin" ? "Admin" : message.user_email || "Client"}</strong>
-      <p>${message.message}</p>
+      ${message.message ? `<p>${message.message}</p>` : ""}
+      ${renderAttachmentMarkup(message)}
       <span>${formatOrderDate(message.created_at)}</span>
     `;
     conversationThread.appendChild(item);
@@ -736,11 +898,35 @@ const appendConversationMessage = (message) => {
   item.className = `message-bubble${message.author_role === "admin" ? " is-admin" : " is-buyer"}`;
   item.innerHTML = `
     <strong>${message.author_role === "admin" ? "Admin" : message.user_email || "Client"}</strong>
-    <p>${message.message}</p>
+    ${message.message ? `<p>${message.message}</p>` : ""}
+    ${renderAttachmentMarkup(message)}
     <span>${formatOrderDate(message.created_at)}</span>
   `;
   conversationThread.appendChild(item);
   conversationThread.scrollTop = conversationThread.scrollHeight;
+};
+
+const renderAttachmentMarkup = (message) => {
+  if (!message?.attachment_url) {
+    return "";
+  }
+
+  const fileName = message.attachment_name || "piece-jointe";
+  const fileSize = formatFileSize(message.attachment_size);
+  const isImage = String(message.attachment_type || "").startsWith("image/");
+
+  return `
+    <div class="attachment-card">
+      ${
+        isImage
+          ? `<a href="${message.attachment_url}" target="_blank" rel="noreferrer"><img src="${message.attachment_url}" alt="${fileName}" /></a>`
+          : ""
+      }
+      <a href="${message.attachment_url}" target="_blank" rel="noreferrer">
+        ${fileName}${fileSize ? ` • ${fileSize}` : ""}
+      </a>
+    </div>
+  `;
 };
 
 const loadConversation = async (orderId, mode, options = {}) => {
@@ -762,6 +948,8 @@ const loadConversation = async (orderId, mode, options = {}) => {
 
   if (mode === "admin") {
     renderAdminDetail(activeOrder);
+  } else {
+    renderAccountDetail(activeOrder);
   }
 
   if (conversationEmpty) {
@@ -923,6 +1111,19 @@ const bindConversationButtons = (mode) => {
       loadConversation(orderId, mode);
     });
   });
+
+  document.querySelectorAll("[data-open-detail]").forEach((button) => {
+    if (button.dataset.bound === "true") {
+      return;
+    }
+
+    button.dataset.bound = "true";
+    button.addEventListener("click", () => {
+      const orderId = button.dataset.openDetail;
+      const order = currentAccountOrders.find((item) => item.id === orderId) || null;
+      renderAccountDetail(order);
+    });
+  });
 };
 
 const bindConversationForm = () => {
@@ -931,6 +1132,7 @@ const bindConversationForm = () => {
   }
 
   const messageField = conversationForm.querySelector('textarea[name="message"]');
+  const attachmentField = conversationForm.querySelector('input[name="attachment"]');
 
   if (messageField && !messageField.dataset.enterBound) {
     messageField.dataset.enterBound = "true";
@@ -957,14 +1159,41 @@ const bindConversationForm = () => {
 
     const formData = new FormData(conversationForm);
     const message = String(formData.get("message") || "").trim();
+    const attachmentFile = attachmentField?.files?.[0] || null;
 
-    if (!message) {
+    if (!message && !attachmentFile) {
       return;
     }
 
     const {
       data: { session },
     } = await supabaseClient.auth.getSession();
+
+    let attachmentPayload = null;
+
+    if (attachmentFile) {
+      const fileData = await fileToBase64(attachmentFile);
+      const uploadResponse = await fetch("/api/messages/upload", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session?.access_token || ""}`,
+        },
+        body: JSON.stringify({
+          orderId: activeConversationOrderId,
+          fileName: attachmentFile.name,
+          fileType: attachmentFile.type,
+          fileData,
+        }),
+      });
+
+      const uploadResult = await uploadResponse.json();
+      if (!uploadResponse.ok) {
+        return;
+      }
+
+      attachmentPayload = uploadResult.attachment || null;
+    }
 
     const response = await fetch("/api/messages/send", {
       method: "POST",
@@ -975,6 +1204,10 @@ const bindConversationForm = () => {
       body: JSON.stringify({
         orderId: activeConversationOrderId,
         message,
+        attachmentUrl: attachmentPayload?.url || "",
+        attachmentName: attachmentPayload?.name || "",
+        attachmentType: attachmentPayload?.type || "",
+        attachmentSize: attachmentPayload?.size || 0,
       }),
     });
 
@@ -988,6 +1221,10 @@ const bindConversationForm = () => {
       author_role: activeConversationMode === "admin" ? "admin" : "buyer",
       user_email: session?.user?.email || "",
       message,
+      attachment_url: attachmentPayload?.url || "",
+      attachment_name: attachmentPayload?.name || "",
+      attachment_type: attachmentPayload?.type || "",
+      attachment_size: attachmentPayload?.size || 0,
       created_at: new Date().toISOString(),
     };
 
@@ -1013,12 +1250,57 @@ if (markReadButton) {
   });
 }
 
+if (adminNoteSaveButton && adminNoteField) {
+  adminNoteSaveButton.addEventListener("click", async () => {
+    const orderId = adminNoteField.dataset.orderId || "";
+    if (!orderId || !supabaseClient) {
+      return;
+    }
+
+    const {
+      data: { session },
+    } = await supabaseClient.auth.getSession();
+
+    adminNoteSaveButton.disabled = true;
+    adminNoteSaveButton.textContent = "Sauvegarde...";
+
+    const response = await fetch("/api/orders/update-note", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session?.access_token || ""}`,
+      },
+      body: JSON.stringify({
+        orderId,
+        adminNote: adminNoteField.value,
+      }),
+    });
+
+    adminNoteSaveButton.disabled = false;
+    adminNoteSaveButton.textContent = "Sauvegarder la note";
+
+    if (!response.ok) {
+      return;
+    }
+
+    await loadAdminOrders();
+  });
+}
+
 if (adminSearch) {
   adminSearch.addEventListener("input", applyAdminFilters);
 }
 
 if (adminFilter) {
   adminFilter.addEventListener("change", applyAdminFilters);
+}
+
+if (adminPaymentFilter) {
+  adminPaymentFilter.addEventListener("change", applyAdminFilters);
+}
+
+if (adminDateFilter) {
+  adminDateFilter.addEventListener("change", applyAdminFilters);
 }
 
 if (year) {

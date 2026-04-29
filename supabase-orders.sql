@@ -23,6 +23,7 @@ alter table public.orders add column if not exists unread_for_buyer integer not 
 alter table public.orders add column if not exists last_message_at timestamptz;
 alter table public.orders add column if not exists last_message_preview text;
 alter table public.orders add column if not exists last_message_author_role text;
+alter table public.orders add column if not exists admin_note text;
 
 create table if not exists public.order_messages (
   id uuid primary key default gen_random_uuid(),
@@ -31,8 +32,21 @@ create table if not exists public.order_messages (
   user_email text,
   author_role text not null check (author_role in ('admin', 'buyer')),
   message text not null,
+  attachment_url text,
+  attachment_name text,
+  attachment_type text,
+  attachment_size integer,
   created_at timestamptz not null default timezone('utc', now())
 );
+
+alter table public.order_messages add column if not exists attachment_url text;
+alter table public.order_messages add column if not exists attachment_name text;
+alter table public.order_messages add column if not exists attachment_type text;
+alter table public.order_messages add column if not exists attachment_size integer;
+
+insert into storage.buckets (id, name, public)
+values ('order-attachments', 'order-attachments', true)
+on conflict (id) do nothing;
 
 alter table public.orders enable row level security;
 alter table public.order_messages enable row level security;

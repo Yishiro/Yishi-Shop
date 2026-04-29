@@ -32,8 +32,18 @@ export default async function handler(request, response) {
       return sendJson(response, 401, { error: "Missing access token." });
     }
 
-    const { orderId, message } = await readJsonBody(request);
-    if (!orderId || !String(message || "").trim()) {
+    const {
+      orderId,
+      message,
+      attachmentUrl,
+      attachmentName,
+      attachmentType,
+      attachmentSize,
+    } = await readJsonBody(request);
+    if (
+      !orderId ||
+      (!String(message || "").trim() && !String(attachmentUrl || "").trim())
+    ) {
       return sendJson(response, 400, { error: "Missing message payload." });
     }
 
@@ -59,12 +69,18 @@ export default async function handler(request, response) {
       user_id: user.id,
       user_email: user.email || "",
       author_role: isAdmin ? "admin" : "buyer",
-      message: String(message).trim(),
+      message: String(message || "").trim(),
+      attachment_url: String(attachmentUrl || "").trim() || null,
+      attachment_name: String(attachmentName || "").trim() || null,
+      attachment_type: String(attachmentType || "").trim() || null,
+      attachment_size: Number(attachmentSize || 0) || null,
     });
 
     await updateOrder(orderId, {
       last_message_at: new Date().toISOString(),
-      last_message_preview: String(message).trim().slice(0, 180),
+      last_message_preview: String(message || attachmentName || "Piece jointe")
+        .trim()
+        .slice(0, 180),
       last_message_author_role: isAdmin ? "admin" : "buyer",
       unread_for_admin: isAdmin ? 0 : Number(order.unread_for_admin || 0) + 1,
       unread_for_buyer: isAdmin ? Number(order.unread_for_buyer || 0) + 1 : 0,

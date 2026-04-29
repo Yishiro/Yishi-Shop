@@ -132,6 +132,39 @@ export const insertMessage = async (payload) => {
   return response.json();
 };
 
+export const uploadAttachment = async ({
+  bucket = "order-attachments",
+  path,
+  contentType,
+  bytes,
+}) => {
+  const { url, serviceRoleKey } = getSupabaseConfig();
+  const response = await fetch(
+    `${url}/storage/v1/object/${bucket}/${path}`,
+    {
+      method: "POST",
+      headers: {
+        apikey: serviceRoleKey,
+        Authorization: `Bearer ${serviceRoleKey}`,
+        "Content-Type": contentType || "application/octet-stream",
+        "x-upsert": "true",
+      },
+      body: bytes,
+    }
+  );
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(`Supabase attachment upload failed: ${text}`);
+  }
+
+  return {
+    bucket,
+    path,
+    publicUrl: `${url}/storage/v1/object/public/${bucket}/${path}`,
+  };
+};
+
 export const deleteExpiredPendingOrders = async () => {
   const { url } = getSupabaseConfig();
   const cutoff = new Date(Date.now() - 10 * 60 * 1000).toISOString();

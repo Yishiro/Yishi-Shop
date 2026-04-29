@@ -14,7 +14,7 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="styles.css?v=t3ch-24" />
+    <link rel="stylesheet" href="styles.css?v=t3ch-27" />
   </head>
   <body>
     <header class="site-header" data-header>
@@ -63,15 +63,15 @@
               <strong>0</strong>
             </article>
             <article class="admin-stat-card">
-              <span>Payees</span>
+              <span>A faire</span>
               <strong>0</strong>
             </article>
             <article class="admin-stat-card">
-              <span>En preparation</span>
+              <span>En cours</span>
               <strong>0</strong>
             </article>
             <article class="admin-stat-card">
-              <span>Livrees</span>
+              <span>Terminees</span>
               <strong>0</strong>
             </article>
           </div>
@@ -91,6 +91,12 @@
               <option value="delivered">Terminees</option>
               <option value="cancelled">Annulees</option>
             </select>
+            <select class="field-input" data-admin-payment-filter>
+              <option value="all">Tous paiements</option>
+              <option value="card">Carte bancaire</option>
+              <option value="paypal">PayPal</option>
+            </select>
+            <input type="date" class="field-input" data-admin-date-filter />
           </div>
           <h2>Toutes les commandes</h2>
           <div class="admin-order-list" data-admin-orders>
@@ -110,6 +116,24 @@
               </p>
             </div>
             <div class="admin-detail-grid" data-admin-detail hidden></div>
+            <div class="admin-note-panel" data-admin-note-panel hidden>
+              <label class="field">
+                <span>Note privee admin</span>
+                <textarea
+                  name="admin-note"
+                  class="field-textarea"
+                  data-admin-note
+                  rows="5"
+                  maxlength="4000"
+                  placeholder="Ajoute ici une note visible uniquement par les admins..."
+                ></textarea>
+              </label>
+              <div class="account-actions">
+                <button type="button" class="button button-secondary" data-admin-note-save>
+                  Sauvegarder la note
+                </button>
+              </div>
+            </div>
           </article>
 
           <article class="account-card conversation-card">
@@ -120,25 +144,28 @@
                 Selectionne une commande pour voir l'echange avec le client.
               </p>
             </div>
-            <div class="account-actions" data-conversation-actions hidden>
-              <button type="button" class="button button-secondary" data-mark-read>
-                Marquer comme lu
-              </button>
+          <div class="account-actions" data-conversation-actions hidden>
+            <button type="button" class="button button-secondary" data-mark-read>
+              Marquer comme lu
+            </button>
+          </div>
+          <div class="conversation-thread" data-conversation-thread hidden></div>
+          <form class="conversation-form" data-conversation-form hidden>
+            <textarea
+              name="message"
+              rows="4"
+              maxlength="1000"
+              placeholder="Repondre au client..."
+            ></textarea>
+            <label class="file-field">
+              <span>Piece jointe</span>
+              <input type="file" name="attachment" accept="image/*,.pdf,.zip,.txt,.webp,.png,.jpg,.jpeg" />
+            </label>
+            <div class="account-actions">
+              <button type="submit" class="button button-primary">Envoyer</button>
             </div>
-            <div class="conversation-thread" data-conversation-thread hidden></div>
-            <form class="conversation-form" data-conversation-form hidden>
-              <textarea
-                name="message"
-                rows="4"
-                maxlength="1000"
-                placeholder="Repondre au client..."
-                required
-              ></textarea>
-              <div class="account-actions">
-                <button type="submit" class="button button-primary">Envoyer</button>
-              </div>
-            </form>
-          </article>
+          </form>
+        </article>
         </div>
       </section>
     </main>
@@ -154,7 +181,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase-config.js"></script>
-    <script src="script.js?v=t3ch-25"></script>
+    <script src="script.js?v=t3ch-27"></script>
   </body>
 </html>
 

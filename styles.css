@@ -1901,6 +1901,11 @@ h3 {
   .admin-detail-grid {
     grid-template-columns: 1fr;
   }
+
+  .account-support-grid,
+  .account-detail-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 720px) {
@@ -2027,7 +2032,7 @@ h3 {
 
 .admin-tools {
   display: grid;
-  grid-template-columns: minmax(0, 1.3fr) minmax(220px, 0.7fr);
+  grid-template-columns: minmax(0, 1.2fr) repeat(3, minmax(180px, 0.5fr));
   gap: 12px;
   margin-bottom: 18px;
 }
@@ -2102,6 +2107,96 @@ h3 {
 .conversation-card {
   display: grid;
   gap: 18px;
+}
+
+.account-support-grid {
+  display: grid;
+  grid-template-columns: minmax(320px, 0.82fr) minmax(0, 1.18fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.account-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.account-detail-item {
+  display: grid;
+  gap: 8px;
+  padding: 14px 16px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.account-detail-item span {
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.account-detail-item strong {
+  color: #fff;
+}
+
+.admin-note-panel {
+  display: grid;
+  gap: 12px;
+}
+
+.field-textarea {
+  width: 100%;
+  min-height: 150px;
+  padding: 14px 16px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  color: #fff;
+  font: inherit;
+  resize: vertical;
+}
+
+.file-field {
+  display: grid;
+  gap: 8px;
+}
+
+.file-field span {
+  color: var(--muted);
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.file-field input[type="file"] {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: 1px dashed rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.03);
+  color: #fff;
+}
+
+.attachment-card {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.attachment-card img {
+  width: 100%;
+  max-height: 220px;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.attachment-card a {
+  color: #7ce9e1;
+  font-weight: 700;
 }
 
 .message-meta-row {

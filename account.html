@@ -14,7 +14,7 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="styles.css?v=t3ch-24" />
+    <link rel="stylesheet" href="styles.css?v=t3ch-27" />
   </head>
   <body>
     <header class="site-header" data-header>
@@ -84,7 +84,18 @@
         </article>
       </section>
 
-      <section class="section">
+      <section class="section account-support-grid">
+        <article class="account-card account-detail-card">
+          <div class="section-heading">
+            <p class="eyebrow">Commande</p>
+            <h2>Historique detaille</h2>
+            <p data-account-detail-empty>
+              Selectionne une commande pour voir le detail complet, les montants et les messages lies.
+            </p>
+          </div>
+          <div class="account-detail-grid" data-account-detail hidden></div>
+        </article>
+
         <article class="account-card conversation-card">
           <div class="section-heading">
             <p class="eyebrow">Messages</p>
@@ -105,8 +116,11 @@
               rows="4"
               maxlength="1000"
               placeholder="Ecris ton message..."
-              required
             ></textarea>
+            <label class="file-field">
+              <span>Piece jointe</span>
+              <input type="file" name="attachment" accept="image/*,.pdf,.zip,.txt,.webp,.png,.jpg,.jpeg" />
+            </label>
             <div class="account-actions">
               <button type="submit" class="button button-primary">Envoyer</button>
             </div>
@@ -126,7 +140,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase-config.js"></script>
-    <script src="script.js?v=t3ch-25"></script>
+    <script src="script.js?v=t3ch-27"></script>
   </body>
 </html>
 
