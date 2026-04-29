@@ -2093,6 +2093,12 @@ h3 {
   color: #fff;
 }
 
+.admin-order-controls select option,
+.field-input option {
+  background: #101722;
+  color: #f5f7fb;
+}
+
 .conversation-card {
   display: grid;
   gap: 18px;
@@ -2128,7 +2134,10 @@ h3 {
   gap: 12px;
   max-height: 480px;
   overflow: auto;
-  padding-right: 4px;
+  min-height: 220px;
+  padding-right: 8px;
+  scroll-behavior: smooth;
+  overscroll-behavior: contain;
 }
 
 .message-bubble {
@@ -2168,6 +2177,7 @@ h3 {
 .conversation-form textarea {
   width: 100%;
   min-height: 140px;
+  max-height: 260px;
   padding: 14px 16px;
   resize: vertical;
   border-radius: 8px;

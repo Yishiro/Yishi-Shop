@@ -5,7 +5,10 @@ import {
 } from "../_lib/supabase-admin.js";
 import { sendJson } from "../_lib/response.js";
 
-const adminEmail = "yishiroof@gmail.com";
+const adminEmails = new Set([
+  "yishiroof@gmail.com",
+  "hichem.hichem041107@gmail.com",
+]);
 
 export default async function handler(request, response) {
   if (request.method !== "POST") {
@@ -22,7 +25,7 @@ export default async function handler(request, response) {
 
     const user = await getUserFromAccessToken(accessToken);
 
-    if (String(user?.email || "").trim().toLowerCase() !== adminEmail) {
+    if (!adminEmails.has(String(user?.email || "").trim().toLowerCase())) {
       return sendJson(response, 403, { error: "Admin access only." });
     }
 

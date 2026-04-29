@@ -5,7 +5,10 @@ import {
 } from "../_lib/supabase-admin.js";
 import { readJsonBody, sendJson } from "../_lib/response.js";
 
-const adminEmail = "yishiroof@gmail.com";
+const adminEmails = new Set([
+  "yishiroof@gmail.com",
+  "hichem.hichem041107@gmail.com",
+]);
 const getFriendlyError = (error) => {
   const message = String(error?.message || "");
   if (/PGRST205|order_messages/i.test(message)) {
@@ -40,8 +43,9 @@ export default async function handler(request, response) {
       return sendJson(response, 404, { error: "Order not found." });
     }
 
-    const isAdmin =
-      String(user?.email || "").trim().toLowerCase() === adminEmail;
+    const isAdmin = adminEmails.has(
+      String(user?.email || "").trim().toLowerCase()
+    );
     const isOwner =
       order.user_id === user.id ||
       String(order.user_email || "").trim().toLowerCase() ===

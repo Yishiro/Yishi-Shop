@@ -60,7 +60,10 @@ const conversationActions = document.querySelector("[data-conversation-actions]"
 const markReadButton = document.querySelector("[data-mark-read]");
 const logoutButton = document.querySelector("[data-logout]");
 const sortModes = ["price-asc", "price-desc", "name-asc", "name-desc"];
-const adminEmail = "yishiroof@gmail.com";
+const adminEmails = new Set([
+  "yishiroof@gmail.com",
+  "hichem.hichem041107@gmail.com",
+]);
 let activeConversationOrderId = "";
 let activeConversationMode = "";
 let activeConversationUnread = 0;
@@ -69,6 +72,7 @@ let currentAdminOrders = [];
 let currentAuthenticatedUser = null;
 let ordersPollTimer = null;
 let audioUnlocked = false;
+let isConversationLoading = false;
 let lastUnreadSnapshot = {
   buyer: 0,
   admin: 0,
@@ -153,7 +157,7 @@ const getPaymentMethodLabel = (method) =>
   method === "paypal" ? "PayPal" : "Carte bancaire";
 
 const isAdminUser = (user) =>
-  String(user?.email || "").trim().toLowerCase() === adminEmail;
+  adminEmails.has(String(user?.email || "").trim().toLowerCase());
 
 const isPendingOrderExpired = (order) => {
   if (order?.status !== "pending_payment" || !order?.created_at) {
@@ -714,10 +718,41 @@ const renderConversation = (messages = []) => {
   conversationThread.scrollTop = conversationThread.scrollHeight;
 };
 
-const loadConversation = async (orderId, mode) => {
+const appendConversationMessage = (message) => {
+  if (!conversationThread) {
+    return;
+  }
+
+  const hasPlaceholder = conversationThread.querySelector(".message-bubble strong");
+  if (
+    hasPlaceholder &&
+    conversationThread.children.length === 1 &&
+    /Chargement|Aucun message/.test(conversationThread.textContent || "")
+  ) {
+    conversationThread.innerHTML = "";
+  }
+
+  const item = document.createElement("article");
+  item.className = `message-bubble${message.author_role === "admin" ? " is-admin" : " is-buyer"}`;
+  item.innerHTML = `
+    <strong>${message.author_role === "admin" ? "Admin" : message.user_email || "Client"}</strong>
+    <p>${message.message}</p>
+    <span>${formatOrderDate(message.created_at)}</span>
+  `;
+  conversationThread.appendChild(item);
+  conversationThread.scrollTop = conversationThread.scrollHeight;
+};
+
+const loadConversation = async (orderId, mode, options = {}) => {
   if (!conversationThread || !conversationForm) {
     return;
   }
+
+  if (isConversationLoading) {
+    return;
+  }
+
+  const { silent = false } = options;
 
   activeConversationOrderId = orderId;
   activeConversationMode = mode;
@@ -746,37 +781,45 @@ const loadConversation = async (orderId, mode) => {
 
   conversationThread.hidden = false;
   conversationForm.hidden = false;
-  conversationThread.innerHTML =
-    '<article class="message-bubble"><strong>Chargement...</strong></article>';
+  if (!silent) {
+    conversationThread.innerHTML =
+      '<article class="message-bubble"><strong>Chargement...</strong></article>';
+  }
 
   const {
     data: { session },
   } = await supabaseClient.auth.getSession();
 
-  const response = await fetch("/api/messages/list", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${session?.access_token || ""}`,
-    },
-    body: JSON.stringify({ orderId }),
-  });
+  isConversationLoading = true;
 
-  const result = await response.json();
-
-  if (!response.ok) {
-    renderConversation([
-      {
-        author_role: "admin",
-        user_email: "",
-        message: result.error || "Impossible de charger les messages.",
-        created_at: new Date().toISOString(),
+  try {
+    const response = await fetch("/api/messages/list", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session?.access_token || ""}`,
       },
-    ]);
-    return;
-  }
+      body: JSON.stringify({ orderId }),
+    });
 
-  renderConversation(result.messages || []);
+    const result = await response.json();
+
+    if (!response.ok) {
+      renderConversation([
+        {
+          author_role: "admin",
+          user_email: "",
+          message: result.error || "Impossible de charger les messages.",
+          created_at: new Date().toISOString(),
+        },
+      ]);
+      return;
+    }
+
+    renderConversation(result.messages || []);
+  } finally {
+    isConversationLoading = false;
+  }
 };
 
 const markConversationAsRead = async () => {
@@ -857,7 +900,9 @@ const startOrdersPolling = () => {
     }
 
     if (activeConversationOrderId && activeConversationMode) {
-      await loadConversation(activeConversationOrderId, activeConversationMode);
+      await loadConversation(activeConversationOrderId, activeConversationMode, {
+        silent: true,
+      });
     }
   }, 20000);
 };
@@ -921,15 +966,19 @@ const bindConversationForm = () => {
       return;
     }
 
+    const optimisticMessage = {
+      author_role: activeConversationMode === "admin" ? "admin" : "buyer",
+      user_email: session?.user?.email || "",
+      message,
+      created_at: new Date().toISOString(),
+    };
+
     conversationForm.reset();
-    await loadConversation(activeConversationOrderId, activeConversationMode);
+    appendConversationMessage(optimisticMessage);
     if (activeConversationMode === "admin") {
-      await loadAdminOrders();
+      loadAdminOrders();
     } else {
-      const {
-        data: { session },
-      } = await supabaseClient.auth.getSession();
-      await loadAccountOrders(session?.user);
+      loadAccountOrders(session?.user);
     }
   });
 };

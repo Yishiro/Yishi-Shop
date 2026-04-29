@@ -5,7 +5,10 @@ import {
 } from "../_lib/supabase-admin.js";
 import { readJsonBody, sendJson } from "../_lib/response.js";
 
-const adminEmail = "yishiroof@gmail.com";
+const adminEmails = new Set([
+  "yishiroof@gmail.com",
+  "hichem.hichem041107@gmail.com",
+]);
 
 export default async function handler(request, response) {
   if (request.method !== "POST") {
@@ -33,7 +36,7 @@ export default async function handler(request, response) {
     }
 
     const email = String(user?.email || "").trim().toLowerCase();
-    const isAdmin = email === adminEmail;
+    const isAdmin = adminEmails.has(email);
     const isOwner =
       order.user_id === user.id ||
       String(order.user_email || "").trim().toLowerCase() === email;
