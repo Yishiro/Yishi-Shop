@@ -1133,6 +1133,7 @@ const bindConversationForm = () => {
 
   const messageField = conversationForm.querySelector('textarea[name="message"]');
   const attachmentField = conversationForm.querySelector('input[name="attachment"]');
+  const submitButton = conversationForm.querySelector('button[type="submit"]');
 
   if (messageField && !messageField.dataset.enterBound) {
     messageField.dataset.enterBound = "true";
@@ -1174,10 +1175,40 @@ const bindConversationForm = () => {
     } = await supabaseClient.auth.getSession();
 
     let attachmentPayload = null;
+    const originalButtonText = submitButton?.textContent || "Envoyer";
 
-    if (attachmentFile) {
-      const fileData = await fileToBase64(attachmentFile);
-      const uploadResponse = await fetch("/api/messages/upload", {
+    if (submitButton) {
+      submitButton.disabled = true;
+      submitButton.textContent = attachmentFile ? "Envoi..." : "Envoi du message...";
+    }
+
+    try {
+      if (attachmentFile) {
+        const fileData = await fileToBase64(attachmentFile);
+        const uploadResponse = await fetch("/api/messages/upload", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session?.access_token || ""}`,
+          },
+          body: JSON.stringify({
+            orderId: activeConversationOrderId,
+            fileName: attachmentFile.name,
+            fileType: attachmentFile.type,
+            fileData,
+          }),
+        });
+
+        const uploadResult = await uploadResponse.json().catch(() => ({}));
+        if (!uploadResponse.ok) {
+          showLiveNotice(uploadResult.error || "Impossible d'envoyer la piece jointe.");
+          return;
+        }
+
+        attachmentPayload = uploadResult.attachment || null;
+      }
+
+      const response = await fetch("/api/messages/send", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -1185,59 +1216,46 @@ const bindConversationForm = () => {
         },
         body: JSON.stringify({
           orderId: activeConversationOrderId,
-          fileName: attachmentFile.name,
-          fileType: attachmentFile.type,
-          fileData,
+          message,
+          attachmentUrl: attachmentPayload?.url || "",
+          attachmentName: attachmentPayload?.name || "",
+          attachmentType: attachmentPayload?.type || "",
+          attachmentSize: attachmentPayload?.size || 0,
         }),
       });
 
-      const uploadResult = await uploadResponse.json();
-      if (!uploadResponse.ok) {
+      const result = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        showLiveNotice(result.error || "Impossible d'envoyer le message.");
         return;
       }
 
-      attachmentPayload = uploadResult.attachment || null;
-    }
-
-    const response = await fetch("/api/messages/send", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${session?.access_token || ""}`,
-      },
-      body: JSON.stringify({
-        orderId: activeConversationOrderId,
+      const optimisticMessage = {
+        author_role: activeConversationMode === "admin" ? "admin" : "buyer",
+        user_email: session?.user?.email || "",
         message,
-        attachmentUrl: attachmentPayload?.url || "",
-        attachmentName: attachmentPayload?.name || "",
-        attachmentType: attachmentPayload?.type || "",
-        attachmentSize: attachmentPayload?.size || 0,
-      }),
-    });
+        attachment_url: attachmentPayload?.url || "",
+        attachment_name: attachmentPayload?.name || "",
+        attachment_type: attachmentPayload?.type || "",
+        attachment_size: attachmentPayload?.size || 0,
+        created_at: new Date().toISOString(),
+      };
 
-    const result = await response.json();
-
-    if (!response.ok) {
-      return;
-    }
-
-    const optimisticMessage = {
-      author_role: activeConversationMode === "admin" ? "admin" : "buyer",
-      user_email: session?.user?.email || "",
-      message,
-      attachment_url: attachmentPayload?.url || "",
-      attachment_name: attachmentPayload?.name || "",
-      attachment_type: attachmentPayload?.type || "",
-      attachment_size: attachmentPayload?.size || 0,
-      created_at: new Date().toISOString(),
-    };
-
-    conversationForm.reset();
-    appendConversationMessage(optimisticMessage);
-    if (activeConversationMode === "admin") {
-      loadAdminOrders();
-    } else {
-      loadAccountOrders(session?.user);
+      conversationForm.reset();
+      appendConversationMessage(optimisticMessage);
+      if (activeConversationMode === "admin") {
+        loadAdminOrders();
+      } else {
+        loadAccountOrders(session?.user);
+      }
+    } catch (error) {
+      showLiveNotice(error?.message || "Impossible d'envoyer le message.");
+    } finally {
+      if (submitButton) {
+        submitButton.disabled = false;
+        submitButton.textContent = originalButtonText;
+      }
     }
   });
 };

@@ -64,27 +64,37 @@ export default async function handler(request, response) {
       return sendJson(response, 403, { error: "Access denied." });
     }
 
-    await insertMessage({
+    const trimmedAttachmentUrl = String(attachmentUrl || "").trim();
+    const messagePayload = {
       order_id: orderId,
       user_id: user.id,
       user_email: user.email || "",
       author_role: isAdmin ? "admin" : "buyer",
       message: String(message || "").trim(),
-      attachment_url: String(attachmentUrl || "").trim() || null,
-      attachment_name: String(attachmentName || "").trim() || null,
-      attachment_type: String(attachmentType || "").trim() || null,
-      attachment_size: Number(attachmentSize || 0) || null,
-    });
+    };
 
-    await updateOrder(orderId, {
-      last_message_at: new Date().toISOString(),
-      last_message_preview: String(message || attachmentName || "Piece jointe")
-        .trim()
-        .slice(0, 180),
-      last_message_author_role: isAdmin ? "admin" : "buyer",
-      unread_for_admin: isAdmin ? 0 : Number(order.unread_for_admin || 0) + 1,
-      unread_for_buyer: isAdmin ? Number(order.unread_for_buyer || 0) + 1 : 0,
-    });
+    if (trimmedAttachmentUrl) {
+      messagePayload.attachment_url = trimmedAttachmentUrl;
+      messagePayload.attachment_name = String(attachmentName || "").trim() || null;
+      messagePayload.attachment_type = String(attachmentType || "").trim() || null;
+      messagePayload.attachment_size = Number(attachmentSize || 0) || null;
+    }
+
+    await insertMessage(messagePayload);
+
+    try {
+      await updateOrder(orderId, {
+        last_message_at: new Date().toISOString(),
+        last_message_preview: String(message || attachmentName || "Piece jointe")
+          .trim()
+          .slice(0, 180),
+        last_message_author_role: isAdmin ? "admin" : "buyer",
+        unread_for_admin: isAdmin ? 0 : Number(order.unread_for_admin || 0) + 1,
+        unread_for_buyer: isAdmin ? Number(order.unread_for_buyer || 0) + 1 : 0,
+      });
+    } catch (updateError) {
+      console.error("Order message metadata update failed", updateError);
+    }
 
     return sendJson(response, 200, { ok: true });
   } catch (error) {
