@@ -1262,7 +1262,8 @@ if (checkoutTitle && qtyInput) {
     }
 
     checkoutFeedback.innerHTML = message;
-    checkoutFeedback.style.color = isError ? "#c2410c" : "";
+    checkoutFeedback.style.color = "";
+    checkoutFeedback.dataset.state = isError ? "error" : "default";
   };
 
   const createPendingOrder = async (userId, userEmail) => {
@@ -1524,7 +1525,8 @@ const setAuthFeedback = (form, message, isError = false) => {
   }
 
   feedback.textContent = message;
-  feedback.style.color = isError ? "#c2410c" : "";
+  feedback.style.color = "";
+  feedback.dataset.state = isError ? "error" : "success";
 };
 
 const getUserDisplayName = (user) =>
