@@ -1136,19 +1136,23 @@ const bindConversationForm = () => {
 
   if (messageField && !messageField.dataset.enterBound) {
     messageField.dataset.enterBound = "true";
-    messageField.addEventListener("keydown", (event) => {
-      if (event.key !== "Enter" || event.shiftKey) {
-        return;
-      }
+      messageField.addEventListener("keydown", (event) => {
+        if (event.key !== "Enter" || event.shiftKey) {
+          return;
+        }
 
-      event.preventDefault();
+        event.preventDefault();
 
-      const submitButton = conversationForm.querySelector('button[type="submit"]');
-      if (submitButton && !submitButton.disabled) {
-        submitButton.click();
-      }
-    });
-  }
+        if (typeof conversationForm.requestSubmit === "function") {
+          conversationForm.requestSubmit();
+          return;
+        }
+
+        conversationForm.dispatchEvent(
+          new Event("submit", { bubbles: true, cancelable: true })
+        );
+      });
+    }
 
   conversationForm.addEventListener("submit", async (event) => {
     event.preventDefault();
